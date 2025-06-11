@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trình Xem Video Youtube - Đánh số thứ tự</title>
+  <title>Trình Xem Video Youtube - Nâng cấp Cao cấp</title>
   <style>
     /* ----- Bảng màu Vàng Kim - Đỏ Đậm ----- */
     :root {
@@ -68,73 +68,29 @@
       margin-bottom: 16px;
     }
     #search-input {
-      width: 100%;
-      padding: 10px 16px 10px 40px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      font-size: 14px;
-      background-color: var(--secondary-bg);
-      color: var(--text-primary);
-      box-sizing: border-box;
-      transition: box-shadow 0.2s;
+      width: 100%; padding: 10px 16px 10px 40px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px;
+      background-color: var(--secondary-bg); color: var(--text-primary); box-sizing: border-box; transition: box-shadow 0.2s;
     }
-    #search-input:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px var(--hover-bg);
-    }
-    #search-wrapper::before {
-      content: '🔍';
-      position: absolute;
-      left: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-secondary);
-    }
+    #search-input:focus { outline: none; box-shadow: 0 0 0 2px var(--hover-bg); }
+    #search-wrapper::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
 
     /* ----- Danh sách Video ----- */
     #song-list-container {
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      overflow: hidden;
-      flex-grow: 1; 
-      min-height: 0;
+      border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; flex-grow: 1; min-height: 0;
     }
     #song-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      overflow-y: auto;
-      height: 100%;
+      list-style: none; padding: 0; margin: 0; overflow-y: auto; height: 100%;
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     #song-list li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
-      border-bottom: 1px solid var(--border-color);
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-      color: var(--text-secondary);
-      font-size: 14px;
-      font-weight: 500;
-      animation: fadeIn 0.5s ease-in-out;
+      display: flex; align-items: center; gap: 12px; padding: 8px; border-bottom: 1px solid var(--border-color); cursor: pointer;
+      transition: background-color 0.2s ease-in-out; color: var(--text-secondary); font-size: 14px; font-weight: 500; animation: fadeIn 0.5s ease-in-out;
     }
-    /* --- CẬP NHẬT: Style cho số thứ tự --- */
     .video-index {
-        font-weight: 600;
-        color: var(--text-secondary);
-        width: 20px; /* Dành không gian cố định cho số thứ tự */
-        text-align: right;
-        flex-shrink: 0;
+        font-weight: 600; color: var(--text-secondary); width: 20px; text-align: right; flex-shrink: 0;
     }
     .video-thumbnail {
-      width: 80px;
-      height: 45px;
-      border-radius: 4px;
-      object-fit: cover;
-      flex-shrink: 0;
-      background-color: var(--hover-bg);
+      width: 80px; height: 45px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background-color: var(--hover-bg);
     }
     .video-title {
       flex-grow: 1;
@@ -142,13 +98,23 @@
     #song-list li:last-child { border-bottom: none; }
     #song-list li:hover { background-color: var(--hover-bg); }
     #song-list li.playing {
-      background-color: var(--hover-bg);
-      color: var(--accent-color);
-      font-weight: 600;
+      background-color: var(--hover-bg); color: var(--accent-color); font-weight: 600;
     }
-    #song-list li.playing .video-index {
-        color: var(--accent-color);
+    #song-list li.playing .video-index { color: var(--accent-color); }
+
+    /* --- NÂNG CẤP: Nút Chia sẻ và Thông báo sao chép --- */
+    .share-btn {
+        background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary); padding: 5px; border-radius: 50%;
+        display: none; /* Ẩn mặc định */
     }
+    .share-btn:hover { background-color: #e0e0e0; }
+    #song-list li.playing .share-btn { display: block; } /* Chỉ hiện ở video đang phát */
+    .copied-toast {
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--text-primary); color: white;
+        padding: 10px 20px; border-radius: 8px; z-index: 1000; font-size: 14px; opacity: 0;
+        transition: opacity 0.3s, bottom 0.3s;
+    }
+    .copied-toast.show { opacity: 1; bottom: 30px; }
 
     /* ----- Thanh cuộn ----- */
     #song-list::-webkit-scrollbar { width: 8px; }
@@ -157,39 +123,35 @@
     
     /* ----- Trình phát ----- */
     #player-wrapper {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      background-color: #000;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative; width: 100%; aspect-ratio: 16 / 9; background-color: #000; border-radius: 12px;
+      overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    #player {
-      width: 100%;
-      height: 100%;
-    }
+    #player { width: 100%; height: 100%; }
     
     /* ----- Thông báo & Hiệu ứng tải ----- */
     .loader-container {
-      position: relative;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      position: relative; height: 100%; display: flex; justify-content: center; align-items: center;
     }
     .loader {
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--hover-bg);
-      border-top: 4px solid var(--accent-color);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+      width: 40px; height: 40px; border: 4px solid var(--hover-bg); border-top: 4px solid var(--accent-color);
+      border-radius: 50%; animation: spin 1s linear infinite;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     .error {
       text-align: center; padding: 20px; color: #bf2600; font-weight: 500; background-color: #ffedeb; border-radius: 8px;
     }
+    
+    /* --- NÂNG CẤP: Thông báo xem tiếp --- */
+    #resume-toast {
+      display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: var(--secondary-bg);
+      padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1001; border: 1px solid var(--border-color);
+      text-align: center;
+    }
+    #resume-toast p { margin: 0 0 12px 0; color: var(--text-primary); }
+    #resume-toast button {
+      background-color: var(--accent-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 0 5px;
+    }
+    #resume-toast button.secondary { background-color: #e0e0e0; color: var(--text-primary); }
     
     /* ----- Giao diện di động ----- */
     @media (max-width: 900px) {
@@ -222,23 +184,24 @@
     </div>
   </div>
 </div>
+<!-- NÂNG CẤP: Thêm các phần tử HTML cho thông báo -->
+<div id="resume-toast"><p>Bạn có muốn xem tiếp video đang xem dở không?</p><button id="resume-yes">Xem tiếp</button><button id="resume-no" class="secondary">Bỏ qua</button></div>
+<div id="copied-toast" class="copied-toast">Đã sao chép link!</div>
 
 <!-- Nạp API Iframe của YouTube -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
   var apiEndpoint = 'https://api.sheetbest.com/sheets/276c7c77-e2f0-4726-9929-7c4848f276bb';
   
-  var youtubePlayer; // Biến toàn cục để lưu trữ đối tượng trình phát
+  var youtubePlayer;
+  var saveStateInterval; // Biến để lưu trữ interval
+  let resumeState = null; // Biến để lưu trạng thái xem tiếp
 
   function adjustLayout() {
     const playerWrapper = document.getElementById('player-wrapper');
     const playlistColumn = document.getElementById('playlist-column');
-
-    if (window.innerWidth > 900) {
-      playlistColumn.style.height = playerWrapper.offsetHeight + 'px';
-    } else {
-      playlistColumn.style.height = 'auto';
-    }
+    if (window.innerWidth > 900) { playlistColumn.style.height = playerWrapper.offsetHeight + 'px'; } 
+    else { playlistColumn.style.height = 'auto'; }
   }
 
   function getYouTubeID(url) {
@@ -251,9 +214,7 @@
   function updateMediaSession(title, videoId) {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: title,
-        artist: 'Trình Xem Video Youtube',
-        album: 'Danh sách phát',
+        title: title, artist: 'Trình Xem Video Youtube', album: 'Danh sách phát',
         artwork: [
           { src: `https://i.ytimg.com/vi/${videoId}/default.jpg`,   sizes: '96x96',   type: 'image/jpeg' },
           { src: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,  sizes: '128x128', type: 'image/jpeg' },
@@ -263,18 +224,40 @@
     }
   }
   
+  // --- SỬA LỖI: Hàm sao chép tương thích hơn ---
+  function copyToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.style.position = 'fixed';
+    textArea.style.top = -50 + 'px'; // Di chuyển ra ngoài màn hình
+    textArea.style.left = -50 + 'px';
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      const toast = document.getElementById('copied-toast');
+      toast.classList.add('show');
+      setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    } catch (err) {
+      console.error('Không thể sao chép link', err);
+      alert('Rất tiếc, không thể sao chép link trên trình duyệt này.');
+    }
+    document.body.removeChild(textArea);
+  }
+
   function setupMediaSessionHandlers() {
      if ('mediaSession' in navigator) {
         navigator.mediaSession.setActionHandler('play', () => { youtubePlayer.playVideo(); });
         navigator.mediaSession.setActionHandler('pause', () => { youtubePlayer.pauseVideo(); });
         navigator.mediaSession.setActionHandler('previoustrack', () => {
             const current = document.querySelector('#song-list li.playing');
-            const prev = current ? current.previousElementSibling : null;
+            const prev = current?.previousElementSibling;
             if (prev) { prev.click(); }
         });
         navigator.mediaSession.setActionHandler('nexttrack', () => {
             const current = document.querySelector('#song-list li.playing');
-            const next = current ? current.nextElementSibling : null;
+            const next = current?.nextElementSibling;
             if (next) { next.click(); }
         });
      }
@@ -293,13 +276,12 @@
       return;
     }
 
-    data.forEach(function(item, index) { // --- CẬP NHẬT: Thêm 'index' để lấy số thứ tự ---
+    data.forEach(function(item, index) {
       const title = item["Tên Bài Hát"]?.trim();
       let videoId = item["Mã Video"]?.trim();
       const link = item["Link Video"]?.trim();
 
       if (!title) return;
-
       if (!videoId && link) { videoId = getYouTubeID(link); }
       if (!videoId) return; 
 
@@ -307,10 +289,9 @@
       li.dataset.videoId = videoId;
       li.dataset.videoTitle = title;
 
-      // --- CẬP NHẬT: Tạo và thêm số thứ tự vào danh sách ---
       const indexSpan = document.createElement('span');
       indexSpan.className = 'video-index';
-      indexSpan.textContent = `${index + 1}.`; // Số thứ tự bắt đầu từ 1
+      indexSpan.textContent = `${index + 1}.`;
       
       const thumbnail = document.createElement('img');
       thumbnail.src = `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`;
@@ -320,62 +301,122 @@
       const titleSpan = document.createElement('span');
       titleSpan.className = 'video-title';
       titleSpan.textContent = title;
+
+      const shareBtn = document.createElement('button');
+      shareBtn.className = 'share-btn';
+      shareBtn.innerHTML = '�';
+      shareBtn.title = 'Chia sẻ video với thời gian hiện tại';
+      shareBtn.onclick = function(e) {
+        e.stopPropagation(); 
+        const currentTime = youtubePlayer.getCurrentTime();
+        const shareUrl = `https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}s`;
+        // --- SỬA LỖI: Gọi hàm sao chép mới ---
+        copyToClipboard(shareUrl);
+      };
       
-      li.appendChild(indexSpan); // Thêm số thứ tự
+      li.appendChild(indexSpan);
       li.appendChild(thumbnail);
       li.appendChild(titleSpan);
+      li.appendChild(shareBtn);
 
       li.onclick = function() {
-        const currentVideoId = this.dataset.videoId;
-        const currentTitle = this.dataset.videoTitle;
-        document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
-        this.classList.add('playing');
-        this.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-        updateMediaSession(currentTitle, currentVideoId);
-
-        if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
-            youtubePlayer.loadVideoById(currentVideoId);
-        } else {
-            youtubePlayer = new YT.Player('player', {
-                height: '100%',
-                width: '100%',
-                videoId: currentVideoId,
-                playerVars: { 'autoplay': 1, 'rel': 0 },
-                events: { 'onStateChange': onPlayerStateChange }
-            });
-        }
+        playVideo(videoId, title, 0); 
       };
       list.appendChild(li);
     });
 
-    const firstSong = list.querySelector('li');
-    if (firstSong) {
-      firstSong.click();
+    if (resumeState) {
+        const videoToResume = document.querySelector(`#song-list li[data-video-id="${resumeState.videoId}"]`);
+        if (videoToResume) {
+            playVideo(resumeState.videoId, videoToResume.dataset.videoTitle, resumeState.time);
+        }
+    } else {
+        const firstSong = list.querySelector('li');
+        if (firstSong) {
+          firstSong.click();
+        }
     }
     
     adjustLayout();
   }
   
+  function playVideo(videoId, title, startTime = 0) {
+      const targetLi = document.querySelector(`#song-list li[data-video-id="${videoId}"]`);
+      if (!targetLi) return;
+      
+      document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
+      document.querySelectorAll('.share-btn').forEach(btn => btn.style.display = 'none');
+      targetLi.classList.add('playing');
+      targetLi.querySelector('.share-btn').style.display = 'block';
+      targetLi.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+      updateMediaSession(title, videoId);
+
+      const playerVars = { 'autoplay': 1, 'rel': 0, 'start': Math.floor(startTime) };
+
+      if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
+          youtubePlayer.loadVideoById({ videoId: videoId, startSeconds: playerVars.start });
+      } else {
+          youtubePlayer = new YT.Player('player', {
+              height: '100%', width: '100%', videoId: videoId,
+              playerVars: playerVars,
+              events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+          });
+      }
+  }
+
+  function onPlayerReady(event) {
+    event.target.playVideo();
+  }
+
+  function savePlayerState() {
+      if (youtubePlayer && typeof youtubePlayer.getPlayerState === 'function' && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
+          const currentTime = youtubePlayer.getCurrentTime();
+          const videoData = youtubePlayer.getVideoData();
+          if (videoData.video_id && currentTime > 0) {
+              const state = { videoId: videoData.video_id, time: currentTime };
+              localStorage.setItem('youtubePlayerState', JSON.stringify(state));
+          }
+      }
+  }
+
   function onPlayerStateChange(event) {
     if ('mediaSession' in navigator) {
         if (event.data === YT.PlayerState.PLAYING) {
             navigator.mediaSession.playbackState = 'playing';
-        } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+            clearInterval(saveStateInterval);
+            saveStateInterval = setInterval(savePlayerState, 3000);
+        } else {
             navigator.mediaSession.playbackState = 'paused';
+            clearInterval(saveStateInterval);
         }
     }
 
     if (event.data === YT.PlayerState.ENDED) {
+        localStorage.removeItem('youtubePlayerState'); 
         const currentPlayingLi = document.querySelector('#song-list li.playing');
-        const nextLi = currentPlayingLi ? currentPlayingLi.nextElementSibling : null;
-        if (nextLi) {
-            nextLi.click();
-        }
+        const nextLi = currentPlayingLi?.nextElementSibling;
+        if (nextLi) { nextLi.click(); }
     }
   }
 
   window.addEventListener('DOMContentLoaded', function() {
+    const savedStateJSON = localStorage.getItem('youtubePlayerState');
+    if (savedStateJSON) {
+        resumeState = JSON.parse(savedStateJSON);
+        const toast = document.getElementById('resume-toast');
+        toast.style.display = 'block';
+
+        document.getElementById('resume-yes').onclick = () => {
+            toast.style.display = 'none';
+        };
+        document.getElementById('resume-no').onclick = () => {
+            localStorage.removeItem('youtubePlayerState');
+            resumeState = null;
+            toast.style.display = 'none';
+        };
+    }
+
     fetch(apiEndpoint)
       .then(res => res.ok ? res.json() : Promise.reject(`Lỗi mạng: ${res.status}`))
       .then(showInfo)
@@ -407,3 +448,4 @@
 </script>
 </body>
 </html>
+�
