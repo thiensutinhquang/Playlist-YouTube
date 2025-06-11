@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trình Xem Video Youtube - Nâng cấp Cao cấp</title>
+  <title>Trình Xem Video Youtube - Chế độ Phát trong nền</title>
   <style>
     /* ----- Bảng màu Vàng Kim - Đỏ Đậm ----- */
     :root {
@@ -102,13 +102,26 @@
     }
     #song-list li.playing .video-index { color: var(--accent-color); }
 
-    /* --- NÂNG CẤP: Nút Chia sẻ và Thông báo sao chép --- */
     .share-btn {
-        background: none; border: none; cursor: pointer; font-size: 18px; color: var(--text-secondary); padding: 5px; border-radius: 50%;
-        display: none; /* Ẩn mặc định */
+        background: none; border: none; cursor: pointer;
+        width: 32px; height: 32px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%;
+        transition: background-color 0.2s, opacity 0.2s;
+        opacity: 0.6;
+        flex-shrink: 0;
+    }
+    #song-list li:hover .share-btn, #song-list li.playing .share-btn {
+        opacity: 1;
     }
     .share-btn:hover { background-color: #e0e0e0; }
-    #song-list li.playing .share-btn { display: block; } /* Chỉ hiện ở video đang phát */
+    .share-btn svg {
+        width: 18px; height: 18px; fill: var(--text-secondary);
+    }
+    #song-list li.playing .share-btn svg {
+        fill: var(--accent-color);
+    }
+
     .copied-toast {
         position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--text-primary); color: white;
         padding: 10px 20px; border-radius: 8px; z-index: 1000; font-size: 14px; opacity: 0;
@@ -141,7 +154,6 @@
       text-align: center; padding: 20px; color: #bf2600; font-weight: 500; background-color: #ffedeb; border-radius: 8px;
     }
     
-    /* --- NÂNG CẤP: Thông báo xem tiếp --- */
     #resume-toast {
       display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background-color: var(--secondary-bg);
       padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1001; border: 1px solid var(--border-color);
@@ -184,18 +196,20 @@
     </div>
   </div>
 </div>
-<!-- NÂNG CẤP: Thêm các phần tử HTML cho thông báo -->
 <div id="resume-toast"><p>Bạn có muốn xem tiếp video đang xem dở không?</p><button id="resume-yes">Xem tiếp</button><button id="resume-no" class="secondary">Bỏ qua</button></div>
 <div id="copied-toast" class="copied-toast">Đã sao chép link!</div>
+<audio id="background-audio" loop></audio>
 
-<!-- Nạp API Iframe của YouTube -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
   var apiEndpoint = 'https://api.sheetbest.com/sheets/276c7c77-e2f0-4726-9929-7c4848f276bb';
   
   var youtubePlayer;
-  var saveStateInterval; // Biến để lưu trữ interval
-  let resumeState = null; // Biến để lưu trạng thái xem tiếp
+  var saveStateInterval;
+  let resumeState = null;
+  const silentAudio = 'data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gTGFTb25vdGhlcXVlLm9yZwBURU5DAAAAHQAAA1N3aXRjaCBKaXhDbGFzaWMALgAAA1REUkMAAAAMAAANjZWYyNzkwMjMzBDAAAAAAWEAAFl4eHgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAllVeAAAAQQECAAAAAAAAADEAAAAA';
+  let backgroundAudioEl;
+  let hasInteracted = false;
 
   function adjustLayout() {
     const playerWrapper = document.getElementById('player-wrapper');
@@ -224,12 +238,11 @@
     }
   }
   
-  // --- SỬA LỖI: Hàm sao chép tương thích hơn ---
   function copyToClipboard(text) {
     const textArea = document.createElement("textarea");
     textArea.style.position = 'fixed';
-    textArea.style.top = -50 + 'px'; // Di chuyển ra ngoài màn hình
-    textArea.style.left = -50 + 'px';
+    textArea.style.top = '-50px';
+    textArea.style.left = '-50px';
     textArea.value = text;
     document.body.appendChild(textArea);
     textArea.focus();
@@ -248,8 +261,8 @@
 
   function setupMediaSessionHandlers() {
      if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', () => { youtubePlayer.playVideo(); });
-        navigator.mediaSession.setActionHandler('pause', () => { youtubePlayer.pauseVideo(); });
+        navigator.mediaSession.setActionHandler('play', () => { if(youtubePlayer) youtubePlayer.playVideo(); });
+        navigator.mediaSession.setActionHandler('pause', () => { if(youtubePlayer) youtubePlayer.pauseVideo(); });
         navigator.mediaSession.setActionHandler('previoustrack', () => {
             const current = document.querySelector('#song-list li.playing');
             const prev = current?.previousElementSibling;
@@ -304,13 +317,12 @@
 
       const shareBtn = document.createElement('button');
       shareBtn.className = 'share-btn';
-      shareBtn.innerHTML = '�';
+      shareBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"></path></svg>`;
       shareBtn.title = 'Chia sẻ video với thời gian hiện tại';
       shareBtn.onclick = function(e) {
         e.stopPropagation(); 
         const currentTime = youtubePlayer.getCurrentTime();
         const shareUrl = `https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}s`;
-        // --- SỬA LỖI: Gọi hàm sao chép mới ---
         copyToClipboard(shareUrl);
       };
       
@@ -341,13 +353,20 @@
   }
   
   function playVideo(videoId, title, startTime = 0) {
+      // --- SỬA LỖI: Chỉ cố gắng phát âm thanh nền một lần khi có tương tác ---
+      if (!hasInteracted) {
+        backgroundAudioEl.play().then(() => {
+          hasInteracted = true;
+        }).catch(e => {
+          console.warn("Không thể tự động phát âm thanh nền, cần tương tác người dùng thực sự.");
+        });
+      }
+
       const targetLi = document.querySelector(`#song-list li[data-video-id="${videoId}"]`);
       if (!targetLi) return;
       
       document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
-      document.querySelectorAll('.share-btn').forEach(btn => btn.style.display = 'none');
       targetLi.classList.add('playing');
-      targetLi.querySelector('.share-btn').style.display = 'block';
       targetLi.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
       updateMediaSession(title, videoId);
@@ -381,18 +400,21 @@
   }
 
   function onPlayerStateChange(event) {
+    const playerState = event.data;
     if ('mediaSession' in navigator) {
-        if (event.data === YT.PlayerState.PLAYING) {
+        if (playerState === YT.PlayerState.PLAYING) {
             navigator.mediaSession.playbackState = 'playing';
+            if(hasInteracted) backgroundAudioEl.play(); // Đồng bộ âm thanh nền nếu đã được phép
             clearInterval(saveStateInterval);
             saveStateInterval = setInterval(savePlayerState, 3000);
         } else {
             navigator.mediaSession.playbackState = 'paused';
+            backgroundAudioEl.pause();
             clearInterval(saveStateInterval);
         }
     }
 
-    if (event.data === YT.PlayerState.ENDED) {
+    if (playerState === YT.PlayerState.ENDED) {
         localStorage.removeItem('youtubePlayerState'); 
         const currentPlayingLi = document.querySelector('#song-list li.playing');
         const nextLi = currentPlayingLi?.nextElementSibling;
@@ -401,6 +423,9 @@
   }
 
   window.addEventListener('DOMContentLoaded', function() {
+    backgroundAudioEl = document.getElementById('background-audio');
+    backgroundAudioEl.src = silentAudio;
+
     const savedStateJSON = localStorage.getItem('youtubePlayerState');
     if (savedStateJSON) {
         resumeState = JSON.parse(savedStateJSON);
@@ -414,6 +439,10 @@
             localStorage.removeItem('youtubePlayerState');
             resumeState = null;
             toast.style.display = 'none';
+            const firstSong = document.querySelector('#song-list li');
+            if(firstSong && !document.querySelector('#song-list li.playing')) {
+                firstSong.click();
+            }
         };
     }
 
@@ -448,4 +477,3 @@
 </script>
 </body>
 </html>
-�
