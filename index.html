@@ -404,24 +404,34 @@
 
   function onPlayerStateChange(event) {
     const playerState = event.data;
+    
+    // --- CẬP NHẬT: Logic xử lý trạng thái mạnh mẽ hơn ---
     if ('mediaSession' in navigator) {
-        if (playerState === YT.PlayerState.PLAYING) {
-            navigator.mediaSession.playbackState = 'playing';
-            if(hasInteracted) backgroundAudioEl.play();
-            clearInterval(saveStateInterval);
-            saveStateInterval = setInterval(savePlayerState, 3000);
-        } else {
-            navigator.mediaSession.playbackState = 'paused';
-            backgroundAudioEl.pause();
-            clearInterval(saveStateInterval);
-        }
-    }
-
-    if (playerState === YT.PlayerState.ENDED) {
-        localStorage.removeItem('youtubePlayerState'); 
-        const currentPlayingLi = document.querySelector('#song-list li.playing');
-        const nextLi = currentPlayingLi?.nextElementSibling;
-        if (nextLi) { nextLi.click(); }
+      switch(playerState) {
+        case YT.PlayerState.PLAYING:
+          navigator.mediaSession.playbackState = 'playing';
+          if(hasInteracted) backgroundAudioEl.play();
+          clearInterval(saveStateInterval);
+          saveStateInterval = setInterval(savePlayerState, 3000);
+          break;
+        case YT.PlayerState.PAUSED:
+          navigator.mediaSession.playbackState = 'paused';
+          backgroundAudioEl.pause();
+          clearInterval(saveStateInterval);
+          break;
+        case YT.PlayerState.ENDED:
+          navigator.mediaSession.playbackState = 'paused';
+          backgroundAudioEl.pause();
+          clearInterval(saveStateInterval);
+          localStorage.removeItem('youtubePlayerState'); 
+          const currentPlayingLi = document.querySelector('#song-list li.playing');
+          const nextLi = currentPlayingLi?.nextElementSibling;
+          if (nextLi) { nextLi.click(); }
+          break;
+        default:
+          // Không thay đổi trạng thái âm thanh nền trong các trạng thái khác (buffering, cued)
+          break;
+      }
     }
   }
 
