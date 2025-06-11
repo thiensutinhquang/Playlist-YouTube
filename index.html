@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trình Xem Video Youtube - Tự động cuộn & Giao diện Gọn</title>
+  <title>Trình Xem Video Youtube - Giao diện Cân Đối</title>
   <style>
     /* ----- Bảng màu Vàng Kim - Đỏ Đậm ----- */
     :root {
@@ -55,6 +55,8 @@
     #playlist-column {
       flex: 1;
       min-width: 300px;
+      display: flex;
+      flex-direction: column;
     }
     #player-column {
       flex: 2;
@@ -81,7 +83,7 @@
       box-shadow: 0 0 0 2px var(--hover-bg);
     }
     #search-wrapper::before {
-      content: '🔍';
+      content: '�';
       position: absolute;
       left: 14px;
       top: 50%;
@@ -94,14 +96,15 @@
       border: 1px solid var(--border-color);
       border-radius: 12px;
       overflow: hidden;
+      flex-grow: 1; /* Cho phép co giãn để lấp đầy không gian */
+      min-height: 0; /* Cần thiết cho flexbox overflow */
     }
     #song-list {
       list-style: none;
       padding: 0;
       margin: 0;
       overflow-y: auto;
-      /* Chiều cao danh sách giảm một nửa */
-      max-height: 225px; 
+      height: 100%; /* Lấp đầy không gian của container cha */
     }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     #song-list li {
@@ -158,8 +161,7 @@
     /* ----- Thông báo & Hiệu ứng tải ----- */
     .loader-container {
       position: relative;
-      /* Chiều cao giảm một nửa để phù hợp với danh sách */
-      height: 225px;
+      height: 450px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -182,9 +184,8 @@
       body { padding: 16px; }
       #main-container { padding: 24px; }
       #layout-container { flex-direction: column; }
-      #playlist-column { min-width: unset; }
-      /* Giảm chiều cao trên di động */
-      #song-list { max-height: 200px; } 
+      #playlist-column { min-width: unset; height: auto !important; } /* Reset height trên di động */
+      #song-list-container { height: 300px; }
     }
   </style>
 </head>
@@ -204,8 +205,7 @@
     </div>
     <div id="player-column">
       <div id="player-wrapper">
-        <!-- Cập nhật thẻ iframe với thuộc tính 'allow' đầy đủ hơn -->
-        <iframe id="player" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="player" allow="autoplay" allowfullscreen></iframe>
       </div>
     </div>
   </div>
@@ -213,6 +213,20 @@
 
 <script>
   var apiEndpoint = 'https://api.sheetbest.com/sheets/276c7c77-e2f0-4726-9929-7c4848f276bb';
+
+  // --- HÀM ĐỂ ĐIỀU CHỈNH CHIỀU CAO ---
+  function adjustLayout() {
+    const playerWrapper = document.getElementById('player-wrapper');
+    const playlistColumn = document.getElementById('playlist-column');
+
+    if (window.innerWidth > 900) { // Chỉ áp dụng trên màn hình lớn
+      // Đặt chiều cao của toàn bộ cột playlist bằng chiều cao của trình phát
+      playlistColumn.style.height = playerWrapper.offsetHeight + 'px';
+    } else {
+      // Trên di động, reset chiều cao về tự động
+      playlistColumn.style.height = 'auto';
+    }
+  }
 
   function getYouTubeID(url) {
     if (!url) return null;
@@ -267,7 +281,6 @@
         document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
         this.classList.add('playing');
         player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-        
         this.scrollIntoView({ behavior: 'smooth', block: 'start' });
       };
       list.appendChild(li);
@@ -277,6 +290,9 @@
     if (firstSong) {
       firstSong.click();
     }
+    
+    // Điều chỉnh layout sau khi dữ liệu đã được tải
+    adjustLayout();
   }
 
   window.addEventListener('DOMContentLoaded', function() {
@@ -303,7 +319,11 @@
         }
       });
     });
+
+    // Thêm lắng nghe sự kiện thay đổi kích thước cửa sổ
+    window.addEventListener('resize', adjustLayout);
   });
 </script>
 </body>
 </html>
+�
