@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trình Xem Video Youtube - Chế độ Phát trong nền</title>
+  <title>Trình Xem Video Youtube - Media Session Hoàn Chỉnh</title>
   <style>
     /* ----- Bảng màu Vàng Kim - Đỏ Đậm ----- */
     :root {
@@ -261,18 +261,22 @@
 
   function setupMediaSessionHandlers() {
      if ('mediaSession' in navigator) {
-        navigator.mediaSession.setActionHandler('play', () => { if(youtubePlayer) youtubePlayer.playVideo(); });
-        navigator.mediaSession.setActionHandler('pause', () => { if(youtubePlayer) youtubePlayer.pauseVideo(); });
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-            const current = document.querySelector('#song-list li.playing');
-            const prev = current?.previousElementSibling;
-            if (prev) { prev.click(); }
-        });
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-            const current = document.querySelector('#song-list li.playing');
-            const next = current?.nextElementSibling;
-            if (next) { next.click(); }
-        });
+        try {
+          navigator.mediaSession.setActionHandler('play', () => { if(youtubePlayer) youtubePlayer.playVideo(); });
+          navigator.mediaSession.setActionHandler('pause', () => { if(youtubePlayer) youtubePlayer.pauseVideo(); });
+          navigator.mediaSession.setActionHandler('previoustrack', () => {
+              const current = document.querySelector('#song-list li.playing');
+              const prev = current?.previousElementSibling;
+              if (prev) { prev.click(); }
+          });
+          navigator.mediaSession.setActionHandler('nexttrack', () => {
+              const current = document.querySelector('#song-list li.playing');
+              const next = current?.nextElementSibling;
+              if (next) { next.click(); }
+          });
+        } catch (error) {
+          console.error('Lỗi khi thiết lập Media Session Handlers:', error);
+        }
      }
   }
 
@@ -353,7 +357,6 @@
   }
   
   function playVideo(videoId, title, startTime = 0) {
-      // --- SỬA LỖI: Chỉ cố gắng phát âm thanh nền một lần khi có tương tác ---
       if (!hasInteracted) {
         backgroundAudioEl.play().then(() => {
           hasInteracted = true;
@@ -404,7 +407,7 @@
     if ('mediaSession' in navigator) {
         if (playerState === YT.PlayerState.PLAYING) {
             navigator.mediaSession.playbackState = 'playing';
-            if(hasInteracted) backgroundAudioEl.play(); // Đồng bộ âm thanh nền nếu đã được phép
+            if(hasInteracted) backgroundAudioEl.play();
             clearInterval(saveStateInterval);
             saveStateInterval = setInterval(savePlayerState, 3000);
         } else {
