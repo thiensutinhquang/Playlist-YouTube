@@ -200,41 +200,56 @@
         font-size: 11px;
         z-index: 1;
         pointer-events: none;
+        white-space: nowrap;
     }
     .dropdown { position: relative; }
     .dropdown-content {
         position: absolute;
         top: calc(100% + 10px); 
-        right: 0; /* Align to the right of the button */
-        transform: none;
-        left: auto;
-        display: flex; flex-direction: row;
-        align-items: center; gap: 6px;
-        background: rgba(0, 0, 0, 0.8);
+        right: 0;
+        display: flex; 
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+        background: rgba(10, 10, 20, 0.85);
         border: 1px solid rgba(255, 255, 255, 0.3);
         border-radius: 12px;
         padding: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        transition: opacity 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
         opacity: 0;
+        visibility: hidden; 
+        transform: translateY(-10px);
         pointer-events: none;
         z-index: 1002;
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        width: 170px;
     }
     .dropdown.show .dropdown-content {
         opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
         pointer-events: auto;
     }
     .dropdown-content a {
-        display: flex; justify-content: center; align-items: center;
-        width: 40px; height: 40px; border-radius: 6px;
-        transition: background-color 0.2s ease, transform 0.2s ease;
+        display: flex; 
+        align-items: center;
+        gap: 10px;
+        width: 100%; 
+        padding: 8px;
+        border-radius: 6px;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+        color: white;
+        font-size: 14px;
+        font-family: var(--font-sans);
+        text-transform: none;
+        box-sizing: border-box;
     }
-    .dropdown-content a img { width: 28px; height: 28px; }
+    .dropdown-content a img { width: 24px; height: 24px; }
     .dropdown-content a:hover {
-        background-color: #374151; /* gray-700 */
-        transform: scale(1.1);
+        background-color: #374151;
     }
 
     /* ----- Giao diện di động ----- */
@@ -246,9 +261,15 @@
       #playlist-column { min-width: unset; height: auto !important; }
       #song-list-container { height: 300px; }
       #player-controls { justify-content: center; }
+      
+      /* SỬA LỖI: Đảm bảo dropdown hoạt động đúng trên mobile */
       .dropdown-content { 
         left: 50%;
-        transform: translateX(-50%);
+        right: auto;
+        transform: translateX(-50%) translateY(-10px); /* Kết hợp transform */
+      }
+      .dropdown.show .dropdown-content {
+        transform: translateX(-50%) translateY(0); /* Đặt trạng thái cuối */
       }
     }
   </style>
@@ -267,23 +288,28 @@
           </a>
           <div class="dropdown" id="platforms-dropdown">
               <button class="nav-button-base footer-action-button" id="platforms-btn">
-                  <span class="button-text-wrapper">NỀN TẢNG</span>
+                  <span class="button-text-wrapper">CÁC NỀN TẢNG</span>
               </button>
               <div class="dropdown-content">
                   <a href="https://www.youtube.com/@Thi%C3%AAnS%E1%BB%A9TinhQuang" target="_blank" rel="noopener noreferrer" title="YouTube">
                      <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" onError="this.onerror=null; this.src='https://placehold.co/28x28/ff0000/ffffff?text=YT';" />
+                     <span>YouTube</span>
                   </a>
                   <a href="https://www.tiktok.com/@minhsutinhquang" target="_blank" rel="noopener noreferrer" title="TikTok">
                      <img src="https://static-00.iconduck.com/assets.00/tiktok-icon-2048x2048-15w2g25h.png" alt="TikTok" onError="this.onerror=null; this.src='https://placehold.co/28x28/ffffff/000000?text=TT';" />
+                     <span>TikTok</span>
                   </a>
                   <a href="https://www.facebook.com/phatphapnhiemmauTinhQuang" target="_blank" rel="noopener noreferrer" title="Facebook">
                      <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" onError="this.onerror=null; this.src='https://placehold.co/28x28/1877f2/ffffff?text=FB';" />
+                     <span>Facebook</span>
                   </a>
                   <a href="https://t.me/Giaoly_phap_don_ngo" target="_blank" rel="noopener noreferrer" title="Telegram">
                      <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" onError="this.onerror=null; this.src='https://placehold.co/28x28/229ed9/ffffff?text=TG';" />
+                     <span>Telegram</span>
                   </a>
                   <a href="https://zalo.me/g/dukrae245" target="_blank" rel="noopener noreferrer" title="Zalo">
                      <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" onError="this.onerror=null; this.src='https://placehold.co/28x28/0068ff/ffffff?text=ZL';" />
+                     <span>Zalo</span>
                   </a>
               </div>
           </div>
@@ -343,6 +369,7 @@
   let youtubePlayer;
   let saveStateInterval;
   let volumeSyncInterval;
+  let dropdownTimer;
   
   let originalData = [];
   let currentPlaylist = [];
@@ -550,13 +577,32 @@
     // --- JavaScript for Dropdown Menu ---
     const dropdown = document.getElementById('platforms-dropdown');
     const dropdownBtn = document.getElementById('platforms-btn');
+    const dropdownContent = dropdown.querySelector('.dropdown-content');
+
     dropdownBtn.addEventListener('click', (event) => {
-      event.stopPropagation(); // Ngăn sự kiện click lan ra ngoài
-      dropdown.classList.toggle('show');
+      event.stopPropagation();
+      const isShowing = dropdown.classList.toggle('show');
+      
+      clearTimeout(dropdownTimer);
+      if (isShowing) {
+        dropdownTimer = setTimeout(() => {
+          dropdown.classList.remove('show');
+        }, 7000);
+      }
     });
+
+    dropdownContent.addEventListener('mouseenter', () => clearTimeout(dropdownTimer));
+    dropdownContent.addEventListener('mouseleave', () => {
+      clearTimeout(dropdownTimer);
+      dropdownTimer = setTimeout(() => {
+        dropdown.classList.remove('show');
+      }, 7000);
+    });
+
     document.addEventListener('click', (event) => {
       if (!dropdown.contains(event.target)) {
         dropdown.classList.remove('show');
+        clearTimeout(dropdownTimer);
       }
     });
   }
