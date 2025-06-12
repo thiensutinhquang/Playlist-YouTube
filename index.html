@@ -68,14 +68,21 @@
     #player-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     #player { width: 100%; height: 100%; }
 
-    #player-controls { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 8px; background-color: var(--hover-bg); border-radius: 10px; }
+    #player-controls { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 8px; background-color: var(--hover-bg); border-radius: 10px; flex-wrap: wrap; }
     .control-group { display: flex; align-items: center; gap: 8px; }
-    .control-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: background-color 0.2s, color 0.2s; display: flex; align-items: center; gap: 6px; }
+    .control-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; }
+    .control-btn.text-btn { width: auto; padding: 6px 12px; border-radius: 6px;}
     .control-btn svg { width: 20px; height: 20px; fill: var(--text-secondary); transition: fill 0.2s; }
     .control-btn:hover { background-color: var(--border-color); color: var(--text-primary); }
     .control-btn:hover svg { fill: var(--text-primary); }
     .control-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
     .control-btn.active svg { fill: white; }
+
+    /* Âm lượng */
+    #volume-controls { flex-grow: 1; min-width: 150px; display: flex; align-items: center; }
+    #volume-slider { -webkit-appearance: none; width: 100%; height: 5px; background: var(--border-color); border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer; margin-left: 8px; }
+    #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; background: var(--accent-color); cursor: pointer; border-radius: 50%; }
+    #volume-slider::-moz-range-thumb { width: 15px; height: 15px; background: var(--accent-color); cursor: pointer; border-radius: 50%; border: none; }
     
     /* ----- Thông báo & Tải ----- */
     .loader-container { position: relative; height: 100%; display: flex; justify-content: center; align-items: center; }
@@ -97,7 +104,7 @@
       #layout-container { flex-direction: column; }
       #playlist-column { min-width: unset; height: auto !important; }
       #song-list-container { height: 300px; }
-      #player-controls { flex-wrap: wrap; justify-content: center; }
+      #player-controls { justify-content: center; }
     }
   </style>
 </head>
@@ -118,11 +125,18 @@
     <div id="player-column">
       <div id="player-wrapper"><div id="player"></div></div>
       <div id="player-controls">
-        <div class="control-group" id="playback-rate-controls">
-          <button class="control-btn" data-rate="0.5">0.5x</button>
-          <button class="control-btn active" data-rate="1">1x</button>
-          <button class="control-btn" data-rate="1.5">1.5x</button>
-          <button class="control-btn" data-rate="2">2x</button>
+        <div class="control-group">
+          <button class="control-btn text-btn" data-rate="0.5">0.5x</button>
+          <button class="control-btn text-btn active" data-rate="1">1x</button>
+          <button class="control-btn text-btn" data-rate="1.5">1.5x</button>
+          <button class="control-btn text-btn" data-rate="2">2x</button>
+        </div>
+        <div class="control-group" id="volume-controls">
+            <button id="mute-btn" class="control-btn" title="Tắt tiếng (M)">
+                <svg id="volume-icon" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>
+                <svg id="mute-icon" style="display: none;" viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L7 9.01V15l3 3 2-2V4z"></path></svg>
+            </button>
+            <input type="range" id="volume-slider" min="0" max="100" value="100" title="Âm lượng">
         </div>
         <div class="control-group">
           <button class="control-btn" id="shuffle-btn" title="Xáo trộn">
@@ -148,6 +162,7 @@
   
   let youtubePlayer;
   let saveStateInterval;
+  let volumeSyncInterval;
   
   let originalData = [];
   let currentPlaylist = [];
@@ -161,6 +176,11 @@
   const songListEl = document.getElementById('song-list');
   const shuffleBtn = document.getElementById('shuffle-btn');
   const repeatBtn = document.getElementById('repeat-btn');
+  const volumeSlider = document.getElementById('volume-slider');
+  const muteBtn = document.getElementById('mute-btn');
+  const volumeIcon = document.getElementById('volume-icon');
+  const muteIcon = document.getElementById('mute-icon');
+
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() {
@@ -261,9 +281,14 @@
 
   // --- Hàm sự kiện (Player, Controls, UI) ---
   function onPlayerReady(event) {
+    youtubePlayer.setVolume(volumeSlider.value);
     event.target.playVideo();
-    const activeRateBtn = document.querySelector('#playback-rate-controls .control-btn.active');
+    const activeRateBtn = document.querySelector('.control-btn.text-btn.active');
     event.target.setPlaybackRate(parseFloat(activeRateBtn.dataset.rate));
+
+    // SỬA LỖI: Bắt đầu đồng bộ giao diện âm lượng với trạng thái thực của player
+    clearInterval(volumeSyncInterval);
+    volumeSyncInterval = setInterval(updateVolumeUI, 250);
   }
 
   function onPlayerStateChange(event) {
@@ -272,14 +297,11 @@
         navigator.mediaSession.playbackState = (playerState === YT.PlayerState.PLAYING) ? 'playing' : 'paused';
     }
 
-    // SỬA LỖI: Đồng bộ hóa âm thanh nền với trạng thái của trình phát chính
     if (playerState === YT.PlayerState.PLAYING) {
-      // Chỉ phát âm thanh nền SAU KHI video chính đã bắt đầu thành công.
       backgroundAudioEl.play().catch(e => console.warn("Không thể phát âm thanh nền:", e.name));
       clearInterval(saveStateInterval);
       saveStateInterval = setInterval(savePlayerState, 3000);
     } else {
-      // Tạm dừng âm thanh nền khi video chính dừng (dừng, kết thúc, v.v.)
       backgroundAudioEl.pause();
       clearInterval(saveStateInterval);
     }
@@ -311,10 +333,11 @@
 
   function setupEventListeners() {
     window.addEventListener('resize', adjustLayout);
+    window.addEventListener('keydown', handleKeyboardShortcuts);
 
     document.getElementById('search-input').addEventListener('input', e => {
       const searchTerm = e.target.value.toLowerCase();
-      songListEl.querySelectorAll('li').forEach(video => {
+      document.querySelectorAll('#song-list li').forEach(video => {
         const title = video.dataset.videoTitle.toLowerCase();
         video.style.display = title.includes(searchTerm) ? 'flex' : 'none';
       });
@@ -331,28 +354,27 @@
         }
     };
 
-    document.getElementById('playback-rate-controls').addEventListener('click', e => {
-        if(e.target.tagName === 'BUTTON') {
+    document.querySelector('#player-controls .control-group').addEventListener('click', e => {
+        if(e.target.classList.contains('text-btn')) {
             const rate = parseFloat(e.target.dataset.rate);
             if (youtubePlayer) youtubePlayer.setPlaybackRate(rate);
-            document.querySelectorAll('#playback-rate-controls .control-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.control-btn.text-btn').forEach(btn => btn.classList.remove('active'));
             e.target.classList.add('active');
         }
     });
 
     shuffleBtn.addEventListener('click', toggleShuffle);
     repeatBtn.addEventListener('click', toggleRepeat);
+    volumeSlider.addEventListener('input', handleVolumeChange);
+    muteBtn.addEventListener('click', toggleMute);
   }
   
   function toggleShuffle() {
     isShuffle = !isShuffle;
     shuffleBtn.classList.toggle('active', isShuffle);
-    
     const playingVideoId = songListEl.querySelector('li.playing')?.dataset.videoId;
-    
     currentPlaylist = isShuffle ? shuffleArray([...originalData]) : [...originalData];
     renderPlaylist();
-    
     const videoToKeepPlaying = songListEl.querySelector(`li[data-video-id="${playingVideoId}"]`);
     if(videoToKeepPlaying) {
         document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
@@ -371,19 +393,86 @@
     if (repeatMode === 'one') {
       repeatBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4zM13 15V9h-1l-2 1v1h1.5v4H13z"/></svg>`;
       repeatBtn.title = 'Lặp lại một bài';
-    } else if (repeatMode === 'all') {
-      repeatBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>`;
-      repeatBtn.title = 'Lặp lại danh sách';
     } else {
+      repeatBtn.title = repeatMode === 'all' ? 'Lặp lại danh sách' : 'Tắt lặp lại';
       repeatBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>`;
-      repeatBtn.title = 'Tắt lặp lại';
+    }
+  }
+    
+  // SỬA LỖI: Cải thiện logic điều khiển âm lượng
+  function handleVolumeChange(e) {
+      if (!youtubePlayer) return;
+      youtubePlayer.setVolume(parseInt(e.target.value, 10));
+  }
+  
+  function toggleMute() {
+      if (!youtubePlayer) return;
+      if (youtubePlayer.isMuted()) {
+        youtubePlayer.unMute();
+      } else {
+        youtubePlayer.mute();
+      }
+  }
+
+  function updateVolumeUI() {
+      if (!youtubePlayer || typeof youtubePlayer.getVolume !== 'function') return;
+  
+      const currentVolume = youtubePlayer.getVolume();
+      const isMuted = youtubePlayer.isMuted();
+      
+      // Cập nhật thanh trượt dựa trên trạng thái thực của player
+      if (document.activeElement !== volumeSlider) { // Chỉ cập nhật nếu người dùng không đang kéo
+          volumeSlider.value = isMuted ? 0 : currentVolume;
+      }
+      
+      const canHearSound = !isMuted && currentVolume > 0;
+      
+      volumeIcon.style.display = canHearSound ? 'block' : 'none';
+      muteIcon.style.display = canHearSound ? 'none' : 'block';
+  }
+
+
+  function handleKeyboardShortcuts(e) {
+    if (e.target === document.getElementById('search-input')) return;
+
+    switch(e.code) {
+        case 'Space':
+            e.preventDefault();
+            const playerState = youtubePlayer?.getPlayerState();
+            if (playerState === YT.PlayerState.PLAYING) {
+                youtubePlayer.pauseVideo();
+            } else {
+                youtubePlayer.playVideo();
+            }
+            break;
+        case 'KeyM':
+            toggleMute();
+            break;
+        case 'ArrowRight':
+            handleVideoEnd();
+            break;
+        case 'ArrowLeft':
+            const current = songListEl.querySelector('li.playing');
+            current?.previousElementSibling?.click();
+            break;
+        case 'ArrowUp':
+            e.preventDefault();
+            if(!youtubePlayer) return;
+            let newVolUp = Math.min(youtubePlayer.getVolume() + 5, 100);
+            youtubePlayer.setVolume(newVolUp);
+            break;
+        case 'ArrowDown':
+            e.preventDefault();
+            if(!youtubePlayer) return;
+            let newVolDown = Math.max(youtubePlayer.getVolume() - 5, 0);
+            youtubePlayer.setVolume(newVolDown);
+            break;
     }
   }
 
   // --- Media Session ---
   function updateMediaSession(title, videoId) {
     if (!('mediaSession' in navigator)) return;
-    
     try {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: title, artist: 'Trình Xem Video Youtube', album: 'Danh sách phát',
@@ -396,25 +485,14 @@
           ]
         });
 
-        navigator.mediaSession.setActionHandler('play', () => {
-            youtubePlayer?.playVideo();
-        });
-        navigator.mediaSession.setActionHandler('pause', () => {
-            youtubePlayer?.pauseVideo();
-        });
+        navigator.mediaSession.setActionHandler('play', () => { youtubePlayer?.playVideo(); });
+        navigator.mediaSession.setActionHandler('pause', () => { youtubePlayer?.pauseVideo(); });
         navigator.mediaSession.setActionHandler('previoustrack', () => {
            const current = songListEl.querySelector('li.playing');
-           const prev = current?.previousElementSibling;
-           if (prev) {
-               playVideo(prev.dataset.videoId, prev.dataset.videoTitle);
-           }
+           current?.previousElementSibling?.click();
         });
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-            handleVideoEnd();
-        });
-    } catch(error) {
-        console.error("Lỗi khi cập nhật Media Session:", error);
-    }
+        navigator.mediaSession.setActionHandler('nexttrack', () => { handleVideoEnd(); });
+    } catch(error) { console.error("Lỗi khi cập nhật Media Session:", error); }
   }
 
   // --- Hàm tiện ích ---
