@@ -262,14 +262,13 @@
       #song-list-container { height: 300px; }
       #player-controls { justify-content: center; }
       
-      /* SỬA LỖI: Đảm bảo dropdown hoạt động đúng trên mobile */
       .dropdown-content { 
         left: 50%;
         right: auto;
-        transform: translateX(-50%) translateY(-10px); /* Kết hợp transform */
+        transform: translateX(-50%) translateY(-10px);
       }
       .dropdown.show .dropdown-content {
-        transform: translateX(-50%) translateY(0); /* Đặt trạng thái cuối */
+        transform: translateX(-50%) translateY(0);
       }
     }
   </style>
@@ -362,6 +361,7 @@
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+ (function() { // SỬA LỖI: Bọc toàn bộ mã trong IIFE để tránh xung đột biến toàn cục
   // --- Cấu hình & Biến trạng thái ---
   const apiEndpoint = 'https://api.sheetbest.com/sheets/276c7c77-e2f0-4726-9929-7c4848f276bb';
   const silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
@@ -820,6 +820,7 @@
           }
       }
   }
+ })();
 </script>
 </body>
 </html>
