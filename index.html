@@ -55,11 +55,40 @@
     #song-list li:hover { background-color: var(--hover-bg); }
     #song-list li.playing { background-color: var(--hover-bg); color: var(--accent-color); font-weight: 600; }
     #song-list li.playing .video-index { color: var(--accent-color); }
-    .share-btn { background: none; border: none; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background-color 0.2s, opacity 0.2s; opacity: 0.6; flex-shrink: 0; }
-    #song-list li:hover .share-btn, #song-list li.playing .share-btn { opacity: 1; }
-    .share-btn:hover { background-color: #e0e0e0; }
-    .share-btn svg { width: 18px; height: 18px; fill: var(--text-secondary); }
-    #song-list li.playing .share-btn svg { fill: var(--accent-color); }
+    
+    /* === NÂNG CẤP HIỆU ỨNG NÚT CHIA SẺ === */
+    .share-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: background-color 0.2s, opacity 0.2s, transform 0.2s ease-out, box-shadow 0.2s ease-out;
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+    #song-list li:hover .share-btn, #song-list li.playing .share-btn {
+      opacity: 1;
+    }
+    .share-btn:hover {
+      background-color: var(--secondary-bg);
+      transform: scale(1.2);
+      box-shadow: 0 4px 10px var(--shadow-color);
+    }
+    .share-btn svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--text-secondary);
+    }
+    #song-list li.playing .share-btn svg {
+      fill: var(--accent-color);
+    }
+    /* === KẾT THÚC NÂNG CẤP === */
+
     #song-list::-webkit-scrollbar { width: 8px; }
     #song-list::-webkit-scrollbar-track { background: #fffdf9; }
     #song-list::-webkit-scrollbar-thumb { background-color: #d4bda5; border-radius: 4px; }
