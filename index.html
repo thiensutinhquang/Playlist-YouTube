@@ -3,64 +3,48 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Play Video Youtube - Media Session Hoàn Chỉnh</title>
+  <title>Play Video Youtube TQ - PWA Chạy Nền</title>
   
-  <!-- === PWA MANIFEST & THEME (ĐÃ NÂNG CẤP) === -->
-  <meta name="theme-color" content="#000000"/>
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiWW91VHViZSBQbGF5ZXIgUFdBIiwic2hvcnRfbmFtZSI6IllUIFBsYXllciIsInN0YXJ0X3VybCI6Ii4vP3NvdXJjZT1wd2EiLCJkaXNwbGF5IjoiYnJvd3NlciIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJ0aGVtZV9jb2xvciI6IiMwMDAwMDAiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiIzAwMDAwMCIsImRlc2NyaXB0aW9uIjoiVHLDrG5oIHBoYXQgdmlkZW8vbmjhuqFjIFlvdVR1YmUgaG9hdCBk4buZbmcgbuG7gW4gbmhpIENocm9tZS4iLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vMTkyeDE5Mi8wMDAwMDAvRkZGRkZGP3RleHQ9WVQiLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn0seyJzcmMiOiJodHRwczovL3BsYWNlaG9sZC5jby81MTJ4NTEyLzAwMDAwMC9GRkZGRkY/dGV4dD1ZVCIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9wbmcifV0sInByZWZlcl9yZWxhdGVkX2FwcGxpY2F0aW9ucyI6ZmFsc2UsInNjb3BlIjoiLyJ9">
-  <link rel="apple-touch-icon" href="https://placehold.co/180x180/000000/FFFFFF?text=YT">
+  <!-- === PWA MANIFEST & THEME === -->
+  <meta name="theme-color" content="#c5a043"/>
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGxheSBWaWRlbyBZb3V0dWJlIFRRIiwic2hvcnRfbmFtZSI6IllvdXR1YmUgVFEiLCJzdGFydF91cmwiOiIuLz9zb3VyY2U9cHdhIiwiZGlzcGxheSI6ImJyb3dzZXIiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwidGhlbWVfY29sb3IiOiIjYzVhMDQzIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkZGRkYiLCJkZXNjcmlwdGlvbiI6IlRyw6xuaCBwaMOhdCB2aWRlby9uaOG6oWMgWW91VHViZSBob+G6oXQgxJHhu5luZyBu4buBbiwgw7luZyBk4bulbmcgZ+G7kWMuIMSQaeG7gXUga2hp4buDbiB04burIG3DoG4gaMOsbmgga2jDs2EuIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvYzVhMDQzLzhCMDAwMD90ZXh0PVRRJmZvbnQ9aW1wYWN0Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vNTEyeDUxMi9jNWEwNDMvOEIwMDAwP3RleHQ9VFEmdm9udD1pbXBhY3QiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dLCJwcmVmZXJfcmVsYXRlZF9hcHBsaWNhdGlvbnMiOmZhbHNlLCJzY29wZSI6Ii8ifQ==">
+  <link rel="apple-touch-icon" href="https://placehold.co/180x180/c5a043/8B0000?text=TQ&font=impact">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Play Video">
+  <meta name="apple-mobile-web-app-title" content="Play Video Youtube TQ">
 
-  <!-- Link font Be Vietnam Pro -->
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@700&display=swap" rel="stylesheet">
 
   <style>
-    /* ----- Bảng màu Vàng Kim - Đỏ Đậm ----- */
+    /* Bảng màu và các style cơ bản */
     :root {
-      --primary-bg: #fffbeb;      /* Màu nền chính (vàng kem rất nhạt) */
-      --secondary-bg: #ffffff;    /* Nền của container (trắng) */
-      --text-primary: #8B0000;    /* Màu chữ chính (đỏ đậm) */
-      --text-secondary: #a13c3c;  /* Màu chữ phụ (đỏ nhạt hơn) */
-      --border-color: #e6cdaa;    /* Màu viền (vàng nâu) */
-      --accent-color: #8B0000;    /* Màu nhấn (đỏ đậm) */
-      --hover-bg: #fff9e6;        /* Nền khi di chuột */
-      --shadow-color: rgba(139, 69, 19, 0.1); /* Màu đổ bóng (nâu nhạt) */
+      --primary-bg: #fdfbf5;
+      --secondary-bg: #ffffff;
+      --text-primary: #2c2c2c;
+      --text-secondary: #5a5a5a;
+      --border-color: #e8d7b3;
+      --accent-color: #c5a043;
+      --hover-bg: #faf6eb;
+      --shadow-color: rgba(197, 160, 67, 0.15);
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--primary-bg);
       margin: 0; padding: 24px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
     }
-
-    /* ----- Container chính ----- */
     #main-container {
       width: 100%; max-width: 1200px; background: var(--secondary-bg); border-radius: 16px;
       box-shadow: 0 4px 12px var(--shadow-color); padding: 32px; border: 1px solid var(--border-color);
     }
-    .main-header-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-    h1 {
-      color: var(--text-primary); margin: 0; font-weight: 600;
-    }
-
-    /* ----- Bố cục ----- */
+    .main-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;}
+    h1 { color: var(--text-primary); margin: 0; font-weight: 600; }
     #layout-container { display: flex; gap: 32px; }
     #playlist-column { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
     #player-column { flex: 2; }
-
-    /* ----- Thanh tìm kiếm ----- */
     #search-wrapper { position: relative; margin-bottom: 16px; }
     #search-input { width: 100%; padding: 10px 16px 10px 40px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 14px; background-color: var(--secondary-bg); color: var(--text-primary); box-sizing: border-box; transition: box-shadow 0.2s; }
     #search-input:focus { outline: none; box-shadow: 0 0 0 2px var(--hover-bg); }
     #search-wrapper::before { content: '🔍'; position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); }
-
-    /* ----- Danh sách Video ----- */
     #song-list-container { border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; flex-grow: 1; min-height: 0; }
     #song-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; height: 100%; }
     #song-list li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s; color: var(--text-secondary); font-size: 14px; font-weight: 500; }
@@ -76,16 +60,11 @@
     .share-btn:hover { background-color: #e0e0e0; }
     .share-btn svg { width: 18px; height: 18px; fill: var(--text-secondary); }
     #song-list li.playing .share-btn svg { fill: var(--accent-color); }
-
-    /* ----- Thanh cuộn ----- */
     #song-list::-webkit-scrollbar { width: 8px; }
     #song-list::-webkit-scrollbar-track { background: #fffdf9; }
     #song-list::-webkit-scrollbar-thumb { background-color: #d4bda5; border-radius: 4px; }
-    
-    /* ----- Trình phát & Điều khiển ----- */
     #player-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     #player { width: 100%; height: 100%; }
-
     #player-controls { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 8px; background-color: var(--hover-bg); border-radius: 10px; flex-wrap: wrap; }
     .control-group { display: flex; align-items: center; gap: 8px; }
     .control-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; }
@@ -95,14 +74,10 @@
     .control-btn:hover svg { fill: var(--text-primary); }
     .control-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
     .control-btn.active svg { fill: white; }
-
-    /* Âm lượng */
     #volume-controls { flex-grow: 1; min-width: 150px; display: flex; align-items: center; }
     #volume-slider { -webkit-appearance: none; width: 100%; height: 5px; background: var(--border-color); border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer; margin-left: 8px; }
     #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; background: var(--accent-color); cursor: pointer; border-radius: 50%; }
     #volume-slider::-moz-range-thumb { width: 15px; height: 15px; background: var(--accent-color); cursor: pointer; border-radius: 50%; border: none; }
-    
-    /* ----- Thông báo & Tải ----- */
     .loader-container { position: relative; height: 100%; display: flex; justify-content: center; align-items: center; }
     .loader { width: 40px; height: 40px; border: 4px solid var(--hover-bg); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -114,202 +89,54 @@
     #resume-toast p { margin: 0 0 12px 0; color: var(--text-primary); }
     #resume-toast button { background-color: var(--accent-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 0 5px; }
     #resume-toast button.secondary { background-color: #ddd; color: var(--text-primary); }
-    
-    /* ----- STYLES FOR HEADER NAVIGATION ----- */
-    .header-nav-wrapper {
-        font-family: 'Be Vietnam Pro', sans-serif;
-        text-transform: uppercase;
-    }
-    .header-nav-bar {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-    .nav-button-base {
-        background: #000;
-        color: #fff;
-        font-weight: 700;
-        height: 44px;
-        padding: 0 18px;
-        border-radius: 10px;
-        text-decoration: none;
-        transition: all 0.2s ease-in-out;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-shrink: 0;
-        cursor: pointer;
-        position: relative;
-    }
-    .nav-button-base:hover {
-        transform: translateY(-3px) scale(1.1);
-    }
-    .nav-button-base:active {
-        transform: translateY(0) scale(0.98);
-    }
-    .main-action-button {
-        border: 2px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 0 25px 8px rgba(172, 92, 232, 0.5), inset 0 0 12px rgba(0, 0, 0, 0.8);
-    }
-    .main-action-button::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 85%;
-        height: 65%;
-        background: radial-gradient(circle, var(--glow-color-red) 0%, #4a0e69 80%);
-        border-radius: 8px;
-        z-index: -1;
-        animation: pulse-beat 1.2s infinite ease-in-out;
-        box-shadow: 0 0 18px 8px rgba(255, 31, 113, 0.7); 
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-    }
-    @keyframes pulse-beat {
-        0% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 20px 8px rgba(255, 31, 113, 0.7); }
-        70% { transform: translate(-50%, -50%) scale(1.15); box-shadow: 0 0 40px 18px rgba(255, 31, 113, 1); }
-        100% { transform: translate(-50%, -50%) scale(0.95); box-shadow: 0 0 20px 8px rgba(255, 31, 113, 0.7); }
-    }
-    .main-action-button:hover {
-        box-shadow: 0 0 45px 18px rgba(172, 92, 232, 0.8);
-    }
-    .footer-action-button {
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        box-shadow: 0 0 20px 7px rgba(172, 92, 232, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.7);
-    }
-    .footer-action-button::before {
-         content: ''; position: absolute; top: 50%; left: 50%;
-         width: 85%; height: 65%;
-         background: radial-gradient(circle, var(--glow-color-blue) 0%, #004d66 80%);
-         border-radius: 8px; z-index: -1;
-         animation: pulse-beat-footer 1.5s infinite ease-in-out;
-         box-shadow: 0 0 15px 7px rgba(0, 191, 255, 0.6);
-         transform: translate(-50%, -50%);
-         pointer-events: none;
-    }
-    @keyframes pulse-beat-footer {
-        0% { transform: translate(-50%, -50%) scale(0.9); box-shadow: 0 0 15px 7px rgba(0, 191, 255, 0.6); }
-        70% { transform: translate(-50%, -50%) scale(1.1); box-shadow: 0 0 25px 12px rgba(0, 191, 255, 0.8); }
-        100% { transform: translate(-50%, -50%) scale(0.9); box-shadow: 0 0 15px 7px rgba(0, 191, 255, 0.6); }
-    }
-    .footer-action-button:hover {
-        box-shadow: 0 0 30px 12px rgba(172, 92, 232, 0.6);
-    }
-    .button-text-wrapper {
-        font-size: 11px;
-        z-index: 1;
-        pointer-events: none;
-        white-space: nowrap;
-    }
+    .header-nav-wrapper { font-family: 'Be Vietnam Pro', sans-serif; text-transform: uppercase; }
+    .header-nav-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .nav-button-base { background: #000; color: #fff; font-weight: 700; height: 44px; padding: 0 18px; border-radius: 10px; text-decoration: none; transition: all 0.2s ease-in-out; display: flex; justify-content: center; align-items: center; flex-shrink: 0; cursor: pointer; position: relative; border: none; gap: 8px; }
+    .nav-button-base svg { width: 18px; height: 18px; fill: #fff; }
+    .nav-button-base:hover { transform: translateY(-3px) scale(1.1); }
+    .nav-button-base:active { transform: translateY(0) scale(0.98); }
+    .button-text-wrapper { font-size: 11px; z-index: 1; pointer-events: none; white-space: nowrap; }
     .dropdown { position: relative; }
-    .dropdown-content {
-        position: absolute;
-        top: calc(100% + 10px); 
-        right: 0;
-        display: flex; 
-        flex-direction: column;
-        align-items: stretch;
-        gap: 6px;
-        background: rgba(10, 10, 20, 0.85);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 12px;
-        padding: 8px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
-        opacity: 0;
-        visibility: hidden; 
-        transform: translateY(-10px);
-        pointer-events: none;
-        z-index: 1002;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        width: 170px;
-    }
-    .dropdown.show .dropdown-content {
-        opacity: 1;
-        visibility: visible;
-        transform: translateY(0);
-        pointer-events: auto;
-    }
-    .dropdown-content a {
-        display: flex; 
-        align-items: center;
-        gap: 10px;
-        width: 100%; 
-        padding: 8px;
-        border-radius: 6px;
-        transition: background-color 0.2s ease;
-        text-decoration: none;
-        color: white;
-        font-size: 14px;
-        font-family: var(--font-sans);
-        text-transform: none;
-        box-sizing: border-box;
-    }
+    .dropdown-content { position: absolute; top: calc(100% + 10px); right: 0; display: flex; flex-direction: column; align-items: stretch; gap: 6px; background: rgba(10, 10, 20, 0.85); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s; opacity: 0; visibility: hidden; transform: translateY(-10px); pointer-events: none; z-index: 1002; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); width: 170px; }
+    .dropdown.show .dropdown-content { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
+    .dropdown-content a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border-radius: 6px; transition: background-color 0.2s ease; text-decoration: none; color: white; font-size: 14px; text-transform: none; box-sizing: border-box; }
     .dropdown-content a img { width: 24px; height: 24px; }
-    .dropdown-content a:hover {
-        background-color: #374151;
-    }
-
-    /* ----- Giao diện di động ----- */
+    .dropdown-content a:hover { background-color: #374151; }
+    .status-indicator { background-color: transparent; border: none; cursor: default; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
+    .status-indicator svg { fill: var(--accent-color); width: 22px; height: 22px; opacity: 0.7; }
     @media (max-width: 900px) {
       body { padding: 16px; }
       #main-container { padding: 20px; }
-      .main-header-container { flex-direction: column; gap: 16px; }
       #layout-container { flex-direction: column; }
       #playlist-column { min-width: unset; height: auto !important; }
       #song-list-container { height: 300px; }
       #player-controls { justify-content: center; }
-      
-      .dropdown-content { 
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%) translateY(-10px);
-      }
-      .dropdown.show .dropdown-content {
-        transform: translateX(-50%) translateY(0);
-      }
+      .dropdown-content { left: 50%; right: auto; transform: translateX(-50%) translateY(-10px); }
+      .dropdown.show .dropdown-content { transform: translateX(-50%) translateY(0); }
     }
   </style>
 </head>
 <body>
 <div id="main-container">
   <div class="main-header-container">
-    <h1>Play Video Youtube</h1>
+    <h1>Play Video Youtube TQ</h1>
     <div class="header-nav-wrapper">
       <div class="header-nav-bar">
-          <a href="https://sites.google.com/view/thiensutinhquang" target="_blank" rel="noopener noreferrer" class="nav-button-base footer-action-button">
-              <span class="button-text-wrapper">TRANG CHỦ</span>
-          </a>
-          <a href="https://thiensutinhquang.github.io/PlayMusic/" target="_blank" rel="noopener noreferrer" class="nav-button-base main-action-button">
-              <span class="button-text-wrapper">Play Nhạc</span>
-          </a>
+          <!-- NÚT CÀI ĐẶT PWA (ẩn mặc định) -->
+          <button id="install-pwa-btn" class="nav-button-base" style="display: none; background-color: var(--accent-color);">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM9.25 9.25a.75.75 0 0 0-1.5 0V12h-.5a.75.75 0 0 0 0 1.5h4a.75.75 0 0 0 0-1.5h-.5V9.25a.75.75 0 0 0-1.5 0V12h-.5V9.25ZM10 6a.75.75 0 0 0-.75.75v.01c0 .414.336.75.75.75h.01a.75.75 0 0 0 .75-.75V6.75a.75.75 0 0 0-.75-.75h-.01Z" clip-rule="evenodd" /></svg>
+              <span class="button-text-wrapper">Cài đặt App</span>
+          </button>
+          <a href="https://sites.google.com/view/thiensutinhquang" target="_blank" rel="noopener noreferrer" class="nav-button-base"><span class="button-text-wrapper">TRANG CHỦ</span></a>
+          <a href="https://thiensutinhquang.github.io/PlayMusic/" target="_blank" rel="noopener noreferrer" class="nav-button-base"><span class="button-text-wrapper">Play Nhạc</span></a>
           <div class="dropdown" id="platforms-dropdown">
-              <button class="nav-button-base footer-action-button" id="platforms-btn">
-                  <span class="button-text-wrapper">CÁC NỀN TẢNG</span>
-              </button>
+              <button class="nav-button-base" id="platforms-btn"><span class="button-text-wrapper">CÁC NỀN TẢNG</span></button>
               <div class="dropdown-content">
-                  <a href="https://www.youtube.com/@Thi%C3%AAnS%E1%BB%A9TinhQuang" target="_blank" rel="noopener noreferrer" title="YouTube">
-                     <img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" onError="this.onerror=null; this.src='https://placehold.co/28x28/ff0000/ffffff?text=YT';" />
-                     <span>YouTube</span>
-                  </a>
-                  <a href="https://www.tiktok.com/@minhsutinhquang" target="_blank" rel="noopener noreferrer" title="TikTok">
-                     <img src="https://static-00.iconduck.com/assets.00/tiktok-icon-2048x2048-15w2g25h.png" alt="TikTok" onError="this.onerror=null; this.src='https://placehold.co/28x28/ffffff/000000?text=TT';" />
-                     <span>TikTok</span>
-                  </a>
-                  <a href="https://www.facebook.com/phatphapnhiemmauTinhQuang" target="_blank" rel="noopener noreferrer" title="Facebook">
-                     <img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" onError="this.onerror=null; this.src='https://placehold.co/28x28/1877f2/ffffff?text=FB';" />
-                     <span>Facebook</span>
-                  </a>
-                  <a href="https://t.me/Giaoly_phap_don_ngo" target="_blank" rel="noopener noreferrer" title="Telegram">
-                     <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" onError="this.onerror=null; this.src='https://placehold.co/28x28/229ed9/ffffff?text=TG';" />
-                     <span>Telegram</span>
-                  </a>
-                  <a href="https://zalo.me/g/dukrae245" target="_blank" rel="noopener noreferrer" title="Zalo">
-                     <img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" onError="this.onerror=null; this.src='https://placehold.co/28x28/0068ff/ffffff?text=ZL';" />
-                     <span>Zalo</span>
-                  </a>
+                  <a href="https://www.youtube.com/@Thi%C3%AAnS%E1%BB%A9TinhQuang" target="_blank" rel="noopener noreferrer" title="YouTube"><img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" onError="this.onerror=null; this.src='https://placehold.co/28x28/ff0000/ffffff?text=YT';" /><span>YouTube</span></a>
+                  <a href="https://www.tiktok.com/@minhsutinhquang" target="_blank" rel="noopener noreferrer" title="TikTok"><img src="https://static-00.iconduck.com/assets.00/tiktok-icon-2048x2048-15w2g25h.png" alt="TikTok" onError="this.onerror=null; this.src='https://placehold.co/28x28/ffffff/000000?text=TT';" /><span>TikTok</span></a>
+                  <a href="https://www.facebook.com/phatphapnhiemmauTinhQuang" target="_blank" rel="noopener noreferrer" title="Facebook"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" onError="this.onerror=null; this.src='https://placehold.co/28x28/1877f2/ffffff?text=FB';" /><span>Facebook</span></a>
+                  <a href="https://t.me/Giaoly_phap_don_ngo" target="_blank" rel="noopener noreferrer" title="Telegram"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" onError="this.onerror=null; this.src='https://placehold.co/28x28/229ed9/ffffff?text=TG';" /><span>Telegram</span></a>
+                  <a href="https://zalo.me/g/dukrae245" target="_blank" rel="noopener noreferrer" title="Zalo"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" onError="this.onerror=null; this.src='https://placehold.co/28x28/0068ff/ffffff?text=ZL';" /><span>Zalo</span></a>
               </div>
           </div>
         </div>
@@ -318,9 +145,7 @@
 
   <div id="layout-container">
     <div id="playlist-column">
-      <div id="search-wrapper">
-        <input type="search" id="search-input" placeholder="Tìm kiếm video...">
-      </div>
+      <div id="search-wrapper"><input type="search" id="search-input" placeholder="Tìm kiếm video..."></div>
       <div id="song-list-container">
         <div id="loading" class="loader-container"><div class="loader"></div></div>
         <ul id="song-list"></ul>
@@ -344,12 +169,11 @@
             <input type="range" id="volume-slider" min="0" max="100" value="100" title="Âm lượng">
         </div>
         <div class="control-group">
-          <button class="control-btn" id="shuffle-btn" title="Xáo trộn">
-            <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
-          </button>
-          <button class="control-btn" id="repeat-btn" title="Tắt lặp lại">
-            <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
-          </button>
+          <button class="control-btn" id="shuffle-btn" title="Xáo trộn"><svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></button>
+          <button class="control-btn" id="repeat-btn" title="Tắt lặp lại"><svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg></button>
+          <div id="wake-lock-status" class="status-indicator" style="display: none;" title="Màn hình sẽ không tắt">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm0-4.5c.41 0 .75.34.75.75v1.5a.75.75 0 0 1-1.5 0v-1.5c0-.41.34-.75.75-.75Zm7.07 2.93a.75.75 0 0 1 1.06-1.06l1.06 1.06a.75.75 0 0 1-1.06 1.06l-1.06-1.06Zm-14.14 0a.75.75 0 0 1 0 1.06L3.87 11.5a.75.75 0 0 1-1.06-1.06l1.06-1.06a.75.75 0 0 1 1.06 0Zm13.07 7.07a.75.75 0 0 1 1.06 1.06l-1.06 1.06a.75.75 0 1 1-1.06-1.06l1.06-1.06ZM3.87 12.5a.75.75 0 1 1 1.06-1.06L3.87 10.44a.75.75 0 1 1-1.06 1.06l1.06 1.06ZM12 18a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 18Zm0-13.5a6.5 6.5 0 1 1 0 13 6.5 6.5 0 0 1 0-13Z"></path></svg>
+          </div>
         </div>
       </div>
     </div>
@@ -361,52 +185,37 @@
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
- (function() { // SỬA LỖI: Bọc toàn bộ mã trong IIFE để tránh xung đột biến toàn cục
+ (function() { 
   // --- Cấu hình & Biến trạng thái ---
   const apiEndpoint = 'https://api.sheetbest.com/sheets/276c7c77-e2f0-4726-9929-7c4848f276bb';
   const silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
   
   let youtubePlayer;
-  let saveStateInterval;
-  let volumeSyncInterval;
-  let dropdownTimer;
-  
-  let originalData = [];
-  let currentPlaylist = [];
-  let resumeState = null;
-  let videoIdFromUrl = null;
-  
-  let isShuffle = false;
-  let repeatMode = 'none'; // 'none', 'all', 'one'
+  let saveStateInterval, volumeSyncInterval, dropdownTimer;
+  let wakeLock = null;
+  let deferredPrompt; // Biến cho sự kiện cài đặt PWA
+
+  let originalData = [], currentPlaylist = [];
+  let resumeState = null, videoIdFromUrl = null;
+  let isShuffle = false, repeatMode = 'none';
 
   const backgroundAudioEl = document.getElementById('background-audio');
   const songListEl = document.getElementById('song-list');
-  const shuffleBtn = document.getElementById('shuffle-btn');
-  const repeatBtn = document.getElementById('repeat-btn');
-  const volumeSlider = document.getElementById('volume-slider');
-  const muteBtn = document.getElementById('mute-btn');
-  const volumeIcon = document.getElementById('volume-icon');
-  const muteIcon = document.getElementById('mute-icon');
-
+  const installButton = document.getElementById('install-pwa-btn');
 
   // --- Hàm chính ---
-  window.addEventListener('DOMContentLoaded', function() {
-    init();
-  });
+  window.addEventListener('DOMContentLoaded', function() { init(); });
 
   function init() {
     setupEventListeners();
     backgroundAudioEl.src = silentAudio;
-
     const urlParams = new URLSearchParams(window.location.search);
     videoIdFromUrl = urlParams.get('v');
-
     const savedStateJSON = localStorage.getItem('youtubePlayerState');
     if (savedStateJSON && !videoIdFromUrl) {
         resumeState = JSON.parse(savedStateJSON);
         document.getElementById('resume-toast').style.display = 'block';
     }
-
     fetch(apiEndpoint)
       .then(res => res.ok ? res.json() : Promise.reject(`Lỗi mạng: ${res.status}`))
       .then(data => {
@@ -421,22 +230,18 @@
     document.getElementById('loading').style.display = "none";
     songListEl.innerHTML = '';
     document.getElementById('err').style.display = 'none';
-
     if (!Array.isArray(currentPlaylist) || currentPlaylist.length === 0) {
       document.getElementById('err').textContent = 'Không tìm thấy dữ liệu!';
       document.getElementById('err').style.display = 'block';
       return;
     }
-
     currentPlaylist.forEach((item, index) => {
       const title = item["Tên Bài Hát"]?.trim();
       const videoId = getYouTubeID(item["Mã Video"]?.trim() || item["Link Video"]?.trim());
       if (!title || !videoId) return;
-
       const li = createPlaylistItem(index, title, videoId);
       songListEl.appendChild(li);
     });
-
     handleInitialPlay();
     adjustLayout();
   }
@@ -444,38 +249,24 @@
   function handleInitialPlay() {
     if (videoIdFromUrl) {
       const itemToPlay = findItemByVideoId(videoIdFromUrl);
-      if (itemToPlay) {
-        playVideo(itemToPlay.videoId, itemToPlay.title);
-        return;
-      }
+      if (itemToPlay) { playVideo(itemToPlay.videoId, itemToPlay.title); return; }
     }
-    
     if (resumeState) {
       const itemToResume = findItemByVideoId(resumeState.videoId);
-      if (itemToResume) {
-        playVideo(itemToResume.videoId, itemToResume.title, resumeState.time);
-        return;
-      }
+      if (itemToResume) { playVideo(itemToResume.videoId, itemToResume.title, resumeState.time); return; }
     }
-    
     const firstSong = songListEl.querySelector('li');
-    if (firstSong) {
-        playVideo(firstSong.dataset.videoId, firstSong.dataset.videoTitle);
-    }
+    if (firstSong) { playVideo(firstSong.dataset.videoId, firstSong.dataset.videoTitle); }
   }
 
   function playVideo(videoId, title, startTime = 0) {
       const targetLi = songListEl.querySelector(`li[data-video-id="${videoId}"]`);
       if (!targetLi) return;
-      
       document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
       targetLi.classList.add('playing');
       targetLi.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
       updateMediaSession(title, videoId);
-
       const playerVars = { 'autoplay': 1, 'rel': 0, 'start': Math.floor(startTime) };
-
       if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
           youtubePlayer.loadVideoById({ videoId: videoId, startSeconds: playerVars.start });
       } else {
@@ -486,13 +277,33 @@
       }
   }
 
-  // --- Hàm sự kiện (Player, Controls, UI) ---
+  const manageWakeLock = async (shouldBeActive) => {
+    if (!('wakeLock' in navigator)) { return; }
+    const wakeLockIcon = document.getElementById('wake-lock-status');
+    try {
+        if (shouldBeActive) {
+            if (wakeLock === null) {
+                wakeLock = await navigator.wakeLock.request('screen');
+                wakeLockIcon.style.display = 'flex';
+                wakeLock.addEventListener('release', () => {
+                    wakeLockIcon.style.display = 'none';
+                    wakeLock = null;
+                });
+            }
+        } else {
+            if (wakeLock !== null) {
+                await wakeLock.release();
+                wakeLock = null;
+            }
+        }
+    } catch (err) { console.error(`Wake Lock Error: ${err.name}, ${err.message}`); }
+  };
+
   function onPlayerReady(event) {
-    youtubePlayer.setVolume(volumeSlider.value);
+    youtubePlayer.setVolume(document.getElementById('volume-slider').value);
     event.target.playVideo();
     const activeRateBtn = document.querySelector('.control-btn.text-btn.active');
     event.target.setPlaybackRate(parseFloat(activeRateBtn.dataset.rate));
-
     clearInterval(volumeSyncInterval);
     volumeSyncInterval = setInterval(updateVolumeUI, 250);
   }
@@ -502,53 +313,75 @@
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = (playerState === YT.PlayerState.PLAYING) ? 'playing' : 'paused';
     }
-
+    
     if (playerState === YT.PlayerState.PLAYING) {
-      backgroundAudioEl.play().catch(e => console.warn("Không thể phát âm thanh nền:", e.name));
+      manageWakeLock(true);
+      backgroundAudioEl.play().catch(e => {});
       clearInterval(saveStateInterval);
       saveStateInterval = setInterval(savePlayerState, 3000);
     } else {
+      manageWakeLock(false);
       backgroundAudioEl.pause();
       clearInterval(saveStateInterval);
     }
     
-    if (playerState === YT.PlayerState.ENDED) {
-      handleVideoEnd();
-    }
+    if (playerState === YT.PlayerState.ENDED) { handleVideoEnd(); }
   }
   
   function handleVideoEnd() {
     localStorage.removeItem('youtubePlayerState'); 
     const currentPlayingLi = songListEl.querySelector('li.playing');
     if (!currentPlayingLi) return;
-
     if (repeatMode === 'one') {
       playVideo(currentPlayingLi.dataset.videoId, currentPlayingLi.dataset.videoTitle);
       return;
     }
-
     let nextLi = currentPlayingLi.nextElementSibling;
     if (!nextLi && repeatMode === 'all') {
       nextLi = songListEl.querySelector('li:first-child');
     }
-
-    if (nextLi) {
-      playVideo(nextLi.dataset.videoId, nextLi.dataset.videoTitle);
-    }
+    if (nextLi) { playVideo(nextLi.dataset.videoId, nextLi.dataset.videoTitle); }
   }
 
   function setupEventListeners() {
     window.addEventListener('resize', adjustLayout);
     window.addEventListener('keydown', handleKeyboardShortcuts);
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && youtubePlayer?.getPlayerState() === YT.PlayerState.PLAYING) {
+            manageWakeLock(true);
+        }
+    });
+
+    // --- Logic xử lý cài đặt PWA ---
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault(); // Ngăn trình duyệt tự hiển thị prompt
+        deferredPrompt = e; // Lưu lại sự kiện
+        installButton.style.display = 'flex'; // Hiển thị nút cài đặt của chúng ta
+    });
+
+    installButton.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt(); // Hiển thị prompt cài đặt của trình duyệt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to the install prompt: ${outcome}`);
+            deferredPrompt = null; // Chỉ sử dụng được một lần
+            installButton.style.display = 'none'; // Ẩn nút sau khi đã tương tác
+        }
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        installButton.style.display = 'none';
+        console.log('PWA đã được cài đặt.');
+    });
+
 
     document.getElementById('search-input').addEventListener('input', e => {
       const searchTerm = e.target.value.toLowerCase();
       document.querySelectorAll('#song-list li').forEach(video => {
-        const title = video.dataset.videoTitle.toLowerCase();
-        video.style.display = title.includes(searchTerm) ? 'flex' : 'none';
+        video.style.display = video.dataset.videoTitle.toLowerCase().includes(searchTerm) ? 'flex' : 'none';
       });
     });
-
     document.getElementById('resume-yes').onclick = () => { document.getElementById('resume-toast').style.display = 'none'; };
     document.getElementById('resume-no').onclick = () => {
         localStorage.removeItem('youtubePlayerState');
@@ -559,7 +392,6 @@
             if(firstSong) playVideo(firstSong.dataset.videoId, firstSong.dataset.videoTitle);
         }
     };
-
     document.querySelector('#player-controls .control-group').addEventListener('click', e => {
         if(e.target.classList.contains('text-btn')) {
             const rate = parseFloat(e.target.dataset.rate);
@@ -568,37 +400,19 @@
             e.target.classList.add('active');
         }
     });
-
-    shuffleBtn.addEventListener('click', toggleShuffle);
-    repeatBtn.addEventListener('click', toggleRepeat);
-    volumeSlider.addEventListener('input', handleVolumeChange);
-    muteBtn.addEventListener('click', toggleMute);
-
-    // --- JavaScript for Dropdown Menu ---
+    document.getElementById('shuffle-btn').addEventListener('click', toggleShuffle);
+    document.getElementById('repeat-btn').addEventListener('click', toggleRepeat);
+    document.getElementById('volume-slider').addEventListener('input', (e) => { if (youtubePlayer) youtubePlayer.setVolume(parseInt(e.target.value, 10)); });
+    document.getElementById('mute-btn').addEventListener('click', () => { if (youtubePlayer) { youtubePlayer.isMuted() ? youtubePlayer.unMute() : youtubePlayer.mute(); } });
+    
     const dropdown = document.getElementById('platforms-dropdown');
     const dropdownBtn = document.getElementById('platforms-btn');
-    const dropdownContent = dropdown.querySelector('.dropdown-content');
-
     dropdownBtn.addEventListener('click', (event) => {
       event.stopPropagation();
       const isShowing = dropdown.classList.toggle('show');
-      
       clearTimeout(dropdownTimer);
-      if (isShowing) {
-        dropdownTimer = setTimeout(() => {
-          dropdown.classList.remove('show');
-        }, 7000);
-      }
+      if (isShowing) { dropdownTimer = setTimeout(() => dropdown.classList.remove('show'), 7000); }
     });
-
-    dropdownContent.addEventListener('mouseenter', () => clearTimeout(dropdownTimer));
-    dropdownContent.addEventListener('mouseleave', () => {
-      clearTimeout(dropdownTimer);
-      dropdownTimer = setTimeout(() => {
-        dropdown.classList.remove('show');
-      }, 7000);
-    });
-
     document.addEventListener('click', (event) => {
       if (!dropdown.contains(event.target)) {
         dropdown.classList.remove('show');
@@ -609,7 +423,7 @@
   
   function toggleShuffle() {
     isShuffle = !isShuffle;
-    shuffleBtn.classList.toggle('active', isShuffle);
+    document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
     const playingVideoId = songListEl.querySelector('li.playing')?.dataset.videoId;
     currentPlaylist = isShuffle ? shuffleArray([...originalData]) : [...originalData];
     renderPlaylist();
@@ -622,12 +436,10 @@
   }
   
   function toggleRepeat() {
+    const repeatBtn = document.getElementById('repeat-btn');
     const modes = ['none', 'all', 'one'];
-    const currentModeIndex = modes.indexOf(repeatMode);
-    repeatMode = modes[(currentModeIndex + 1) % modes.length];
-    
+    repeatMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
     repeatBtn.classList.toggle('active', repeatMode !== 'none');
-    
     if (repeatMode === 'one') {
       repeatBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4zM13 15V9h-1l-2 1v1h1.5v4H13z"/></svg>`;
       repeatBtn.title = 'Lặp lại một bài';
@@ -637,108 +449,55 @@
     }
   }
     
-  function handleVolumeChange(e) {
-      if (!youtubePlayer) return;
-      youtubePlayer.setVolume(parseInt(e.target.value, 10));
-  }
-  
-  function toggleMute() {
-      if (!youtubePlayer) return;
-      if (youtubePlayer.isMuted()) {
-        youtubePlayer.unMute();
-      } else {
-        youtubePlayer.mute();
-      }
-  }
-
   function updateVolumeUI() {
       if (!youtubePlayer || typeof youtubePlayer.getVolume !== 'function') return;
-  
+      const volumeSlider = document.getElementById('volume-slider');
+      const volumeIcon = document.getElementById('volume-icon');
+      const muteIcon = document.getElementById('mute-icon');
       const currentVolume = youtubePlayer.getVolume();
       const isMuted = youtubePlayer.isMuted();
-      
-      if (document.activeElement !== volumeSlider) {
-          volumeSlider.value = isMuted ? 0 : currentVolume;
-      }
-      
+      if (document.activeElement !== volumeSlider) { volumeSlider.value = isMuted ? 0 : currentVolume; }
       const canHearSound = !isMuted && currentVolume > 0;
-      
       volumeIcon.style.display = canHearSound ? 'block' : 'none';
       muteIcon.style.display = canHearSound ? 'none' : 'block';
   }
 
-
   function handleKeyboardShortcuts(e) {
     if (e.target === document.getElementById('search-input')) return;
-
+    const playerState = youtubePlayer?.getPlayerState();
     switch(e.code) {
-        case 'Space':
-            e.preventDefault();
-            const playerState = youtubePlayer?.getPlayerState();
-            if (playerState === YT.PlayerState.PLAYING) {
-                youtubePlayer.pauseVideo();
-            } else {
-                youtubePlayer.playVideo();
-            }
-            break;
-        case 'KeyM':
-            toggleMute();
-            break;
-        case 'ArrowRight':
-            handleVideoEnd();
-            break;
-        case 'ArrowLeft':
-            const current = songListEl.querySelector('li.playing');
-            current?.previousElementSibling?.click();
-            break;
-        case 'ArrowUp':
-            e.preventDefault();
-            if(!youtubePlayer) return;
-            let newVolUp = Math.min(youtubePlayer.getVolume() + 5, 100);
-            youtubePlayer.setVolume(newVolUp);
-            break;
-        case 'ArrowDown':
-            e.preventDefault();
-            if(!youtubePlayer) return;
-            let newVolDown = Math.max(youtubePlayer.getVolume() - 5, 0);
-            youtubePlayer.setVolume(newVolDown);
-            break;
+        case 'Space': e.preventDefault(); (playerState === YT.PlayerState.PLAYING) ? youtubePlayer.pauseVideo() : youtubePlayer.playVideo(); break;
+        case 'KeyM': document.getElementById('mute-btn').click(); break;
+        case 'ArrowRight': handleVideoEnd(); break;
+        case 'ArrowLeft': songListEl.querySelector('li.playing')?.previousElementSibling?.click(); break;
+        case 'ArrowUp': e.preventDefault(); if(youtubePlayer) youtubePlayer.setVolume(Math.min(youtubePlayer.getVolume() + 5, 100)); break;
+        case 'ArrowDown': e.preventDefault(); if(youtubePlayer) youtubePlayer.setVolume(Math.max(youtubePlayer.getVolume() - 5, 0)); break;
     }
   }
 
-  // --- Media Session ---
   function updateMediaSession(title, videoId) {
     if (!('mediaSession' in navigator)) return;
     try {
         navigator.mediaSession.metadata = new MediaMetadata({
-          title: title, artist: 'Play Video Youtube', album: 'Danh sách phát',
+          title: title, artist: 'Play Video Youtube TQ', album: 'Danh sách phát',
           artwork: [
             { src: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`, sizes: '1280x720', type: 'image/jpeg' },
             { src: `https://i.ytimg.com/vi/${videoId}/sddefault.jpg`,   sizes: '640x480', type: 'image/jpeg' },
-            { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,   sizes: '480x360', type: 'image/jpeg' },
-            { src: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,   sizes: '320x180', type: 'image/jpeg' },
-            { src: `https://i.ytimg.com/vi/${videoId}/default.jpg`,    sizes: '120x90',  type: 'image/jpeg' }
+            { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,   sizes: '480x360', type: 'image/jpeg' }
           ]
         });
-
         navigator.mediaSession.setActionHandler('play', () => { youtubePlayer?.playVideo(); });
         navigator.mediaSession.setActionHandler('pause', () => { youtubePlayer?.pauseVideo(); });
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-           const current = songListEl.querySelector('li.playing');
-           current?.previousElementSibling?.click();
-        });
+        navigator.mediaSession.setActionHandler('previoustrack', () => songListEl.querySelector('li.playing')?.previousElementSibling?.click());
         navigator.mediaSession.setActionHandler('nexttrack', () => { handleVideoEnd(); });
     } catch(error) { console.error("Lỗi khi cập nhật Media Session:", error); }
   }
 
-  // --- Hàm tiện ích ---
   function getYouTubeID(url) {
     if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
+    const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
     return (match && match[2].length === 11) ? match[2] : url;
   }
-  
   function shuffleArray(array) {
       for (let i = array.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -746,55 +505,37 @@
       }
       return array;
   }
-
   function findItemByVideoId(videoId) {
     const item = originalData.find(d => getYouTubeID(d["Mã Video"]?.trim() || d["Link Video"]?.trim()) === videoId);
-    if (!item) return null;
-    return { videoId: videoId, title: item["Tên Bài Hát"]?.trim() };
+    return item ? { videoId: videoId, title: item["Tên Bài Hát"]?.trim() } : null;
   }
-  
   function adjustLayout() {
     const playerWrapper = document.getElementById('player-wrapper');
     const playerControls = document.getElementById('player-controls');
     const playlistColumn = document.getElementById('playlist-column');
     if (window.innerWidth > 900) { 
       playlistColumn.style.height = (playerWrapper.offsetHeight + playerControls.offsetHeight + 16) + 'px'; 
-    } 
-    else { playlistColumn.style.height = 'auto'; }
+    } else { playlistColumn.style.height = 'auto'; }
   }
-
   function handleFetchError(err) {
     document.getElementById('loading').style.display = "none";
-    const errDiv = document.getElementById('err');
-    errDiv.textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
-    errDiv.style.display = 'block';
+    document.getElementById('err').textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
+    document.getElementById('err').style.display = 'block';
   }
-  
   function createPlaylistItem(index, title, videoId) {
       const li = document.createElement('li');
       li.dataset.videoId = videoId;
       li.dataset.videoTitle = title;
       li.onclick = () => playVideo(videoId, title, 0);
-
-      const shareBtnHTML = `<button class="share-btn" title="Chia sẻ video với thời gian hiện tại"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"></path></svg></button>`;
-
-      li.innerHTML = `
-        <span class="video-index">${index + 1}.</span>
-        <img class="video-thumbnail" src="https://i.ytimg.com/vi/${videoId}/mqdefault.jpg" alt="Thumbnail for ${title}" loading="lazy">
-        <span class="video-title">${title}</span>
-        ${shareBtnHTML}
-      `;
-      
+      const shareBtnHTML = `<button class="share-btn" title="Chia sẻ video"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"></path></svg></button>`;
+      li.innerHTML = `<span class="video-index">${index + 1}.</span><img class="video-thumbnail" src="https://i.ytimg.com/vi/${videoId}/mqdefault.jpg" alt="Thumbnail for ${title}" loading="lazy"><span class="video-title">${title}</span>${shareBtnHTML}`;
       li.querySelector('.share-btn').onclick = (e) => {
         e.stopPropagation();
         const currentTime = (youtubePlayer && youtubePlayer.getVideoData().video_id === videoId) ? youtubePlayer.getCurrentTime() : 0;
-        const shareUrl = `https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}s`;
-        copyToClipboard(shareUrl);
+        copyToClipboard(`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}s`);
       };
-
       return li;
   }
-
   function copyToClipboard(text) {
     const textArea = document.createElement("textarea");
     textArea.style.position = 'fixed'; textArea.style.top = '-99px';
@@ -809,7 +550,6 @@
     } catch (err) { console.error('Không thể sao chép link', err); }
     document.body.removeChild(textArea);
   }
-  
   function savePlayerState() {
       if (youtubePlayer && youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) {
           const currentTime = youtubePlayer.getCurrentTime();
