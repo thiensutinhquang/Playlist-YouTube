@@ -32,119 +32,109 @@
       --glow-color-2: #ffac3e; 
       --glow-color-3: #56c2ff;
       --glow-color-4: #4aff94;
+      --theme-switcher-bg: rgba(255, 255, 255, 0.85);
     }
+    
+    /* === CÁC BỘ MÀU GIAO DIỆN === */
+    [data-theme="dark"] {
+        --primary-bg: #1A202C; --secondary-bg: #2D3748; --text-primary: #EDF2F7;
+        --text-secondary: #A0AEC0; --border-color: #4A5568; --accent-color: #f9d56e;
+        --hover-bg: #4A5568; --shadow-color: rgba(0, 0, 0, 0.2); --theme-switcher-bg: rgba(26, 32, 44, 0.85);
+    }
+    [data-theme="preset-manh-me"] {
+        --primary-bg: #0d3b66; --secondary-bg: #1f4e79; --text-primary: #f9d56e;
+        --text-secondary: #faf0ca; --border-color: #3b6a94; --accent-color: #f9d56e;
+        --hover-bg: #2a5a85; --shadow-color: rgba(0, 0, 0, 0.2); --theme-switcher-bg: rgba(13, 59, 102, 0.85);
+    }
+    [data-theme="preset-diu-nhe"] {
+        --primary-bg: #4c3a69; --secondary-bg: #5f4b8b; --text-primary: #e6e6fa;
+        --text-secondary: #dcd0ff; --border-color: #7d6b9c; --accent-color: #ffb6c1;
+        --hover-bg: #6c5b90; --shadow-color: rgba(0, 0, 0, 0.2); --theme-switcher-bg: rgba(76, 58, 105, 0.85);
+    }
+    [data-theme="preset-tuoi-mat"] {
+        --primary-bg: #004d40; --secondary-bg: #00695c; --text-primary: #a7ffeb;
+        --text-secondary: #80cbc4; --border-color: #26a69a; --accent-color: #a7ffeb;
+        --hover-bg: #00796b; --shadow-color: rgba(0, 0, 0, 0.2); --theme-switcher-bg: rgba(0, 77, 64, 0.85);
+    }
+    [data-theme="preset-hien-dai"] {
+        --primary-bg: #2e7d32; --secondary-bg: #388e3c; --text-primary: #ffeb3b;
+        --text-secondary: #cddc39; --border-color: #66bb6a; --accent-color: #ffeb3b;
+        --hover-bg: #43a047; --shadow-color: rgba(0, 0, 0, 0.2); --theme-switcher-bg: rgba(46, 125, 50, 0.85);
+    }
+    [data-theme="preset-am-ap"] {
+        --primary-bg: #4a148c; --secondary-bg: #6a1b9a; --text-primary: #ffab40;
+        --text-secondary: #ffd180; --border-color: #8e24aa; --accent-color: #ffab40;
+        --hover-bg: #7b1fa2; --shadow-color: rgba(0, 0, 0, 0.2); --theme-switcher-bg: rgba(74, 20, 140, 0.85);
+    }
+    [data-theme="preset-trang-nha"] {
+        --primary-bg: #0d47a1; --secondary-bg: #1565c0; --text-primary: #bbdefb;
+        --text-secondary: #90caf9; --border-color: #42a5f5; --accent-color: #bbdefb;
+        --hover-bg: #1976d2; --shadow-color: rgba(0, 0, 0, 0.2); --theme-switcher-bg: rgba(13, 71, 161, 0.85);
+    }
+
+    /* === CẢI TIẾN BỐ CỤC TOÀN DIỆN === */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--primary-bg);
-      margin: 0; padding: 24px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
+      background-color: var(--primary-bg); color: var(--text-primary); transition: background-color 0.3s, color 0.3s;
+      margin: 0; padding: 20px; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh;
     }
     #main-container {
-      width: 100%; max-width: 1200px; background: var(--secondary-bg); border-radius: 16px;
-      box-shadow: 0 4px 12px var(--shadow-color); padding: 32px; border: 1px solid var(--border-color);
+      width: 100%; max-width: 1200px; background: var(--secondary-bg); border-radius: 20px;
+      box-shadow: 0 6px 15px var(--shadow-color); padding: 32px; border: 1px solid var(--border-color);
+      transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
     }
-    .main-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;}
-    h1 { color: var(--text-primary); margin: 0; font-weight: 600; }
+    h1, #song-list li, #search-input, .control-btn, .lucide {
+        color: var(--text-primary); transition: color 0.3s;
+    }
+    #song-list-container, #search-input, #player-controls, .control-btn {
+        border-color: var(--border-color); background-color: var(--secondary-bg);
+        transition: background-color 0.3s, border-color 0.3s;
+    }
+    #player-controls, #song-list li:hover { background-color: var(--hover-bg); }
+
+    .main-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;}
     #layout-container { display: flex; gap: 32px; }
     #playlist-column { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
     #player-column { flex: 2; }
 
-    /* === THANH TÌM KIẾM === */
-    #search-wrapper { 
-        position: relative; 
-        margin-bottom: 16px; 
-    }
-    #search-input { 
-        width: 100%; 
-        padding: 10px 40px; 
-        border-radius: 8px; 
-        border: 1px solid var(--border-color); 
-        font-size: 14px; 
-        background-color: var(--secondary-bg); 
-        color: var(--text-primary); 
-        box-sizing: border-box; 
-        transition: box-shadow 0.2s, border-color 0.2s; 
-    }
-    #search-input:focus { 
-        outline: none; 
-        box-shadow: 0 0 0 2px var(--hover-bg);
-        border-color: var(--accent-color);
-    }
-    .search-icon { 
-        position: absolute; 
-        left: 12px; 
-        top: 50%; 
-        transform: translateY(-50%); 
-        color: var(--text-secondary);
-        pointer-events: none;
-    }
-    #clear-search-btn {
-        position: absolute;
-        right: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: transparent;
-        border: none;
-        cursor: pointer;
-        padding: 4px;
-        display: none; /* Hiển thị bằng JS */
-        color: var(--text-secondary);
-    }
+    #search-wrapper { position: relative; margin-bottom: 16px; }
+    #search-input { width: 100%; padding: 12px 40px; border-radius: 10px; font-size: 14px; }
+    #search-input:focus { box-shadow: 0 0 0 2px var(--hover-bg); border-color: var(--accent-color); }
+    .search-icon { left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; position: absolute; }
+    #clear-search-btn { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; padding: 4px; display: none; color: var(--text-secondary); }
     #clear-search-btn:hover { color: var(--text-primary); }
-    #song-list mark {
-        background-color: var(--accent-color);
-        color: white;
-        padding: 1px 2px;
-        border-radius: 3px;
-    }
-    #no-results-message {
-        text-align: center;
-        padding: 40px 20px;
-        color: var(--text-secondary);
-        font-style: italic;
-    }
+    #song-list mark { background-color: var(--accent-color); color: white; padding: 1px 2px; border-radius: 3px; }
+    #no-results-message { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-style: italic; }
 
-    #song-list-container { border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; flex-grow: 1; min-height: 0; }
+    #song-list-container { border-radius: 12px; overflow: hidden; flex-grow: 1; min-height: 0; }
     #song-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; height: 100%; }
-    #song-list li { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; transition: background-color 0.2s; color: var(--text-secondary); font-size: 14px; font-weight: 500; }
-    .video-index { font-weight: 600; color: var(--text-secondary); width: 24px; text-align: right; flex-shrink: 0; }
-    .video-thumbnail { width: 80px; height: 45px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background-color: var(--hover-bg); }
-    .video-title { flex-grow: 1; }
+    #song-list li { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-bottom: 1px solid var(--border-color); cursor: pointer; }
+    .video-index { font-size: 1.1em; font-weight: 700; width: 36px; text-align: center; flex-shrink: 0; display: flex; align-items: center; justify-content: center;}
+    .video-thumbnail { width: 64px; height: 36px; border-radius: 4px; object-fit: cover; flex-shrink: 0; background-color: var(--hover-bg);}
+    .video-title { flex-grow: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px;}
+
     #song-list li:last-child { border-bottom: none; }
-    #song-list li:hover { background-color: var(--hover-bg); }
-    #song-list li.playing { background-color: var(--hover-bg); color: var(--accent-color); font-weight: 600; }
+    #song-list li.playing { color: var(--accent-color); font-weight: 600; }
     #song-list li.playing .video-index { color: var(--accent-color); }
-    .share-btn { background: none; border: none; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: background-color 0.2s, opacity 0.2s, transform 0.2s ease-out, box-shadow 0.2s ease-out; opacity: 0.6; flex-shrink: 0; }
+    .share-btn { background: none; border: none; cursor: pointer; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s ease-out; opacity: 0.6; flex-shrink: 0; }
     #song-list li:hover .share-btn, #song-list li.playing .share-btn { opacity: 1; }
-    .share-btn:hover { background-color: var(--secondary-bg); transform: scale(1.2); box-shadow: 0 4px 10px var(--shadow-color); }
+    .share-btn:hover { background-color: var(--secondary-bg); transform: scale(1.1); box-shadow: 0 2px 8px var(--shadow-color); }
     #song-list li.playing .share-btn .lucide { stroke: var(--accent-color); }
     #song-list::-webkit-scrollbar { width: 8px; }
-    #song-list::-webkit-scrollbar-track { background: #fffdf9; }
-    #song-list::-webkit-scrollbar-thumb { background-color: #d4bda5; border-radius: 4px; }
+    #song-list::-webkit-scrollbar-track { background: var(--hover-bg); }
+    #song-list::-webkit-scrollbar-thumb { background-color: var(--border-color); border-radius: 4px; }
     #player-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     #player { width: 100%; height: 100%; }
-    #player-controls { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 8px; background-color: var(--hover-bg); border-radius: 10px; flex-wrap: wrap; }
-    .control-group { display: flex; align-items: center; gap: 8px; }
-    .control-btn { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); padding: 0; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; transition: background-color 0.2s, color 0.2s, border-color 0.2s; display: flex; align-items: center; justify-content: center; }
-    .control-btn.text-btn { width: auto; padding: 6px 12px; border-radius: 6px;}
-    .control-btn:hover { background-color: var(--border-color); color: var(--text-primary); }
-    .control-btn:hover .lucide { stroke: var(--text-primary); }
-    .control-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
-    .control-btn.active .lucide { stroke: white; }
-    #volume-controls { flex-grow: 1; min-width: 150px; display: flex; align-items: center; }
-    #volume-slider { -webkit-appearance: none; width: 100%; height: 5px; background: var(--border-color); border-radius: 5px; outline: none; transition: opacity .2s; cursor: pointer; margin-left: 8px; }
-    #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; background: var(--accent-color); cursor: pointer; border-radius: 50%; }
-    #volume-slider::-moz-range-thumb { width: 15px; height: 15px; background: var(--accent-color); cursor: pointer; border-radius: 50%; border: none; }
-    .loader-container { position: relative; height: 100%; display: flex; justify-content: center; align-items: center; }
-    .loader { width: 40px; height: 40px; border: 4px solid var(--hover-bg); border-top: 4px solid var(--accent-color); border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { 100% { transform: rotate(360deg); } }
-    .error { text-align: center; padding: 20px; color: #bf2600; font-weight: 500; background-color: #ffedeb; border-radius: 8px; }
-    .copied-toast, #resume-toast { position: fixed; left: 50%; transform: translateX(-50%); background-color: var(--secondary-bg); padding: 16px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1001; border: 1px solid var(--border-color); text-align: center; }
-    .copied-toast { bottom: 20px; opacity: 0; transition: opacity 0.3s, bottom 0.3s; background-color: var(--text-primary); color: white; }
-    .copied-toast.show { opacity: 1; bottom: 30px; }
-    #resume-toast { display: none; top: 20px; }
-    #resume-toast p { margin: 0 0 12px 0; color: var(--text-primary); }
-    #resume-toast button { background-color: var(--accent-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 0 5px; }
-    #resume-toast button.secondary { background-color: #ddd; color: var(--text-primary); }
+    #player-controls { margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 24px; padding: 12px; border-radius: 12px; flex-wrap: wrap; }
+    .control-group { display: flex; align-items: center; gap: 10px; }
+    .control-btn { width: 40px; height: 40px; }
+    .control-btn.text-btn { width: auto; padding: 6px 14px; }
+    #volume-slider::-webkit-slider-thumb { background: var(--accent-color); }
+    #volume-slider::-moz-range-thumb { background: var(--accent-color); }
+    .loader { border: 4px solid var(--hover-bg); border-top: 4px solid var(--accent-color); }
+    .copied-toast, #resume-toast { background-color: var(--secondary-bg); box-shadow: 0 4px 12px var(--shadow-color); border: 1px solid var(--border-color); }
+    #resume-toast p { color: var(--text-primary); }
+    #resume-toast button { background-color: var(--accent-color); }
     .header-nav-wrapper { font-family: 'Be Vietnam Pro', sans-serif; text-transform: uppercase; }
     .header-nav-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .nav-button-base { background: #1a1a1a; color: #fff; font-weight: 700; height: 44px; padding: 0 18px; border-radius: 10px; text-decoration: none; transition: all 0.2s ease-in-out; display: flex; justify-content: center; align-items: center; flex-shrink: 0; cursor: pointer; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1); gap: 8px; }
@@ -157,47 +147,46 @@
     .btn-kho-tho { --glow-color: var(--glow-color-2); }
     .btn-play-nhac { --glow-color: var(--glow-color-3); }
     .btn-nen-tang { --glow-color: var(--glow-color-4); }
-    .btn-cai-dat { background-color: var(--accent-color); --glow-color: #fff; }
+    .btn-cai-dat, .btn-giao-dien { background-color: var(--accent-color); --glow-color: #fff; }
+    
+    /* === MENU DROPDOWN === */
     .dropdown { position: relative; }
-    .dropdown-content { position: absolute; top: calc(100% + 10px); right: 0; display: flex; flex-direction: column; align-items: stretch; gap: 6px; background: rgba(10, 10, 20, 0.85); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s; opacity: 0; visibility: hidden; transform: translateY(-10px); pointer-events: none; z-index: 1002; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); width: 170px; }
+    #theme-switcher .dropdown-content { right: 0; width: 220px; }
+    #platforms-dropdown-wrapper .dropdown-content { right: 0; width: 180px; }
+    .dropdown-content { position: absolute; top: calc(100% + 10px); display: flex; flex-direction: column; align-items: stretch; gap: 6px; background: var(--theme-switcher-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s; opacity: 0; visibility: hidden; transform: translateY(-10px); pointer-events: none; z-index: 1002; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
     .dropdown.show .dropdown-content { opacity: 1; visibility: visible; transform: translateY(0); pointer-events: auto; }
-    .dropdown-content a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px; border-radius: 6px; transition: background-color 0.2s ease; text-decoration: none; color: white; font-size: 14px; text-transform: none; box-sizing: border-box; }
-    .dropdown-content a img { width: 24px; height: 24px; }
-    .dropdown-content a:hover { background-color: #374151; }
+    #platforms-dropdown-wrapper .dropdown-content a { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 12px; border-radius: 8px; transition: background-color 0.2s ease; text-decoration: none; color: var(--text-primary); font-size: 14px; font-weight: 500; text-transform: none; box-sizing: border-box; }
+    #platforms-dropdown-wrapper .dropdown-content a:hover { background-color: var(--hover-bg); }
+    #platforms-dropdown-wrapper .dropdown-content a img { width: 20px; height: 20px; flex-shrink: 0; }
+    
+    .theme-toggle-wrapper { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; margin-bottom: 8px; border-bottom: 1px solid var(--border-color); }
+    .theme-toggle-wrapper label { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .theme-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .theme-toggle input { opacity: 0; width: 0; height: 0; }
+    .theme-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; border-radius: 24px; }
+    .theme-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+    input:checked + .theme-slider { background-color: var(--accent-color); }
+    input:checked + .theme-slider:before { transform: translateX(20px); }
+
+    .presets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .preset-btn { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s, transform 0.2s; }
+    .preset-btn:hover { transform: scale(1.1); }
+    .preset-btn.active { border-color: var(--accent-color); }
+    #preset-manh-me { background: linear-gradient(135deg, #0d3b66, #f9d56e); }
+    #preset-diu-nhe { background: linear-gradient(135deg, #4c3a69, #ffb6c1); }
+    #preset-tuoi-mat { background: linear-gradient(135deg, #004d40, #a7ffeb); }
+    #preset-hien-dai { background: linear-gradient(135deg, #2e7d32, #ffeb3b); }
+    #preset-am-ap { background: linear-gradient(135deg, #4a148c, #ffab40); }
+    #preset-trang-nha { background: linear-gradient(135deg, #0d47a1, #bbdefb); }
+
     .status-indicator { background-color: transparent; border: none; cursor: default; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; }
     
-    /* === STYLES CHO LUCIDE ICONS === */
-    .lucide {
-        stroke-width: 2px;
-        position: relative;
-        top: 1px; /* Căn chỉnh lại cho đẹp */
-    }
-    .nav-button-base .lucide {
-        stroke: #fff;
-        width: 18px;
-        height: 18px;
-    }
-    .control-btn .lucide, #clear-search-btn .lucide {
-        stroke: var(--text-secondary);
-        width: 20px;
-        height: 20px;
-        transition: stroke 0.2s;
-    }
-    .share-btn .lucide {
-        stroke: var(--text-secondary);
-        width: 18px;
-        height: 18px;
-    }
-    .status-indicator .lucide {
-        stroke: var(--accent-color);
-        width: 22px;
-        height: 22px;
-        opacity: 0.7;
-    }
-    .search-icon .lucide {
-        width: 18px;
-        height: 18px;
-    }
+    .lucide { stroke-width: 2px; position: relative; top: 1px; }
+    .nav-button-base .lucide { stroke: #fff; width: 18px; height: 18px; }
+    .control-btn .lucide, #clear-search-btn .lucide { stroke: var(--text-secondary); width: 20px; height: 20px; transition: stroke 0.3s; }
+    .share-btn .lucide { stroke: var(--text-secondary); width: 18px; height: 18px; }
+    .status-indicator .lucide { stroke: var(--accent-color); width: 22px; height: 22px; opacity: 0.7; }
+    .search-icon .lucide { width: 18px; height: 18px; }
 
     @media (max-width: 900px) {
       body { padding: 16px; }
@@ -206,12 +195,12 @@
       #playlist-column { min-width: unset; height: auto !important; }
       #song-list-container { height: 300px; }
       #player-controls { justify-content: center; }
-      .dropdown-content { left: 50%; right: auto; transform: translateX(-50%) translateY(-10px); }
+      .dropdown .dropdown-content { right: auto; left: 50%; transform: translateX(-50%) translateY(-10px); }
       .dropdown.show .dropdown-content { transform: translateX(-50%) translateY(0); }
     }
   </style>
 </head>
-<body>
+<body data-theme="light">
 <div id="main-container">
   <div class="main-header-container">
     <h1>Play Video Youtube TQ</h1>
@@ -224,7 +213,7 @@
           <a href="https://sites.google.com/view/thiensutinhquang" target="_blank" rel="noopener noreferrer" class="nav-button-base btn-trang-chu"><span class="button-text-wrapper">TRANG CHỦ</span></a>
           <a href="https://thiensutinhquang.github.io/playtholientuc/" target="_blank" rel="noopener noreferrer" class="nav-button-base btn-kho-tho"><span class="button-text-wrapper">Kho thơ</span></a>
           <a href="https://thiensutinhquang.github.io/PlayMusic/" target="_blank" rel="noopener noreferrer" class="nav-button-base btn-play-nhac"><span class="button-text-wrapper">Play Nhạc</span></a>
-          <div class="dropdown" id="platforms-dropdown">
+          <div class="dropdown" id="platforms-dropdown-wrapper">
               <button class="nav-button-base btn-nen-tang" id="platforms-btn"><span class="button-text-wrapper">CÁC NỀN TẢNG</span></button>
               <div class="dropdown-content">
                   <a href="https://www.youtube.com/@Thi%C3%AAnS%E1%BB%A9TinhQuang" target="_blank" rel="noopener noreferrer" title="YouTube"><img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" onError="this.onerror=null; this.src='https://placehold.co/28x28/ff0000/ffffff?text=YT';" /><span>YouTube</span></a>
@@ -233,6 +222,30 @@
                   <a href="https://t.me/Giaoly_phap_don_ngo" target="_blank" rel="noopener noreferrer" title="Telegram"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" onError="this.onerror=null; this.src='https://placehold.co/28x28/229ed9/ffffff?text=TG';" /><span>Telegram</span></a>
                   <a href="https://zalo.me/g/dukrae245" target="_blank" rel="noopener noreferrer" title="Zalo"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" onError="this.onerror=null; this.src='https://placehold.co/28x28/0068ff/ffffff?text=ZL';" /><span>Zalo</span></a>
               </div>
+          </div>
+          <!-- Menu Giao diện -->
+          <div class="dropdown" id="theme-switcher">
+            <button class="nav-button-base btn-giao-dien" id="theme-btn">
+                <i data-lucide="palette"></i>
+                <span class="button-text-wrapper">Giao diện</span>
+            </button>
+            <div class="dropdown-content">
+                <div class="theme-toggle-wrapper">
+                    <label for="theme-toggle-checkbox">Sáng / Tối</label>
+                    <label class="theme-toggle">
+                        <input type="checkbox" id="theme-toggle-checkbox">
+                        <span class="theme-slider"></span>
+                    </label>
+                </div>
+                <div class="presets-grid">
+                    <button class="preset-btn" id="preset-manh-me" data-theme="preset-manh-me" title="Mạnh mẽ"></button>
+                    <button class="preset-btn" id="preset-diu-nhe" data-theme="preset-diu-nhe" title="Dịu nhẹ"></button>
+                    <button class="preset-btn" id="preset-tuoi-mat" data-theme="preset-tuoi-mat" title="Tươi mát"></button>
+                    <button class="preset-btn" id="preset-hien-dai" data-theme="preset-hien-dai" title="Hiện đại"></button>
+                    <button class="preset-btn" id="preset-am-ap" data-theme="preset-am-ap" title="Ấm áp"></button>
+                    <button class="preset-btn" id="preset-trang-nha" data-theme="preset-trang-nha" title="Trang nhã"></button>
+                </div>
+            </div>
           </div>
         </div>
     </div>
@@ -293,10 +306,10 @@
   const silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
   
   let youtubePlayer;
-  let saveStateInterval, volumeSyncInterval, dropdownTimer;
+  let saveStateInterval, volumeSyncInterval;
   let wakeLock = null;
   let deferredPrompt; 
-  let fuse; // Biến cho thư viện tìm kiếm Fuse.js
+  let fuse;
 
   let originalData = [], currentPlaylist = [];
   let resumeState = null, videoIdFromUrl = null;
@@ -312,12 +325,9 @@
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
 
-  /**
-   * Khởi tạo ứng dụng
-   */
   function init() {
-    lucide.createIcons(); // Khởi tạo Lucide Icons
     setupEventListeners();
+    loadTheme();
     backgroundAudioEl.src = silentAudio;
     const urlParams = new URLSearchParams(window.location.search);
     videoIdFromUrl = urlParams.get('v');
@@ -337,9 +347,6 @@
       .catch(handleFetchError);
   }
 
-  /**
-   * Cài đặt thư viện tìm kiếm thông minh Fuse.js
-   */
   function setupFuseSearch() {
     const fuseOptions = {
         keys: ['Tên Bài Hát'],
@@ -351,36 +358,27 @@
     fuse = new Fuse(originalData, fuseOptions);
   }
 
-  /**
-   * Hiển thị danh sách phát
-   * @param {Array} playlistToRender - Mảng các video để hiển thị
-   * @param {Array|null} searchResults - Kết quả từ Fuse.js để tô sáng
-   */
-  function renderPlaylist(playlistToRender, searchResults = null) {
+  function renderPlaylist(playlistData, isSearchResult = false) {
     songListEl.innerHTML = '';
     noResultsMessage.style.display = 'none';
     
-    // SỬA LỖI: Cập nhật currentPlaylist với các mục được hiển thị
-    currentPlaylist = playlistToRender;
+    currentPlaylist = isSearchResult ? playlistData.map(r => r.item) : playlistData;
 
-    if (!playlistToRender || playlistToRender.length === 0) {
-        if(searchInput.value){
-            noResultsMessage.style.display = 'block';
-            noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
-        }
+    if (currentPlaylist.length === 0 && searchInput.value) {
+        noResultsMessage.style.display = 'block';
+        noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
         return;
     }
 
-    playlistToRender.forEach((item, index) => {
-        // SỬA LỖI: Đảm bảo 'item' là một đối tượng hợp lệ trước khi truy cập thuộc tính
+    currentPlaylist.forEach((item, index) => {
         if (!item) return;
 
         const title = item["Tên Bài Hát"]?.trim();
         const videoId = getYouTubeID(item["Mã Video"]?.trim() || item["Link Video"]?.trim());
         
         let highlightedTitle = title;
-        if (searchResults) {
-            const resultItem = searchResults.find(res => res.item === item);
+        if (isSearchResult) {
+            const resultItem = playlistData.find(res => res.item === item);
             if (resultItem && resultItem.matches && resultItem.matches[0] && resultItem.matches[0].indices) {
                 highlightedTitle = highlightMatches(title, resultItem.matches[0].indices);
             }
@@ -398,9 +396,6 @@
      lucide.createIcons();
   }
   
-  /**
-   * Xử lý việc phát video lần đầu
-   */
   function handleInitialPlay() {
     if (videoIdFromUrl) {
       const itemToPlay = findItemByVideoId(videoIdFromUrl);
@@ -418,9 +413,6 @@
     }
   }
 
-  /**
-   * Phát một video cụ thể
-   */
   function playVideo(videoId, title, startTime = 0) {
       document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
       const targetLi = songListEl.querySelector(`li[data-video-id="${videoId}"]`);
@@ -440,9 +432,6 @@
       }
   }
 
-  /**
-   * Quản lý Wake Lock API để giữ màn hình sáng
-   */
   const manageWakeLock = async (shouldBeActive) => {
     if (!('wakeLock' in navigator)) { return; }
     const wakeLockIcon = document.getElementById('wake-lock-status');
@@ -510,11 +499,7 @@
     if (nextLi) { playVideo(nextLi.dataset.videoId, nextLi.dataset.videoTitle); }
   }
 
-  /**
-   * Kích hoạt phản hồi rung trên thiết bị
-   * @param {number} duration - Thời gian rung (ms)
-   */
-  function triggerHapticFeedback(duration = 20) {
+  function triggerHapticFeedback(duration = 10) {
       if ('vibrate' in navigator) {
           navigator.vibrate(duration);
       }
@@ -554,7 +539,7 @@
             return;
         }
         const results = fuse.search(searchTerm);
-        renderPlaylist(results.map(res => res.item), results);
+        renderPlaylist(results, true);
     });
 
     clearSearchBtn.addEventListener('click', () => {
@@ -599,39 +584,116 @@
         if (youtubePlayer) { youtubePlayer.isMuted() ? youtubePlayer.unMute() : youtubePlayer.mute(); } 
     });
     
-    const dropdown = document.getElementById('platforms-dropdown');
-    const dropdownBtn = document.getElementById('platforms-btn');
-    dropdownBtn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const isShowing = dropdown.classList.toggle('show');
-      clearTimeout(dropdownTimer);
-      if (isShowing) { dropdownTimer = setTimeout(() => dropdown.classList.remove('show'), 7000); }
+    // --- Event Listeners for Dropdowns (including Theme Switcher) ---
+    let activeDropdown = null;
+    let dropdownTimeout;
+
+    document.querySelectorAll('.dropdown').forEach(dropdown => {
+        const button = dropdown.querySelector('button');
+        const content = dropdown.querySelector('.dropdown-content');
+
+        button.addEventListener('click', (event) => {
+            event.stopPropagation();
+            triggerHapticFeedback();
+
+            if (activeDropdown && activeDropdown !== dropdown) {
+                activeDropdown.classList.remove('show');
+            }
+
+            dropdown.classList.toggle('show');
+            activeDropdown = dropdown.classList.contains('show') ? dropdown : null;
+            
+            clearTimeout(dropdownTimeout);
+            if (activeDropdown) {
+                dropdownTimeout = setTimeout(() => {
+                    activeDropdown.classList.remove('show');
+                    activeDropdown = null;
+                }, 7000);
+            }
+        });
+        
+        content.addEventListener('mouseenter', () => clearTimeout(dropdownTimeout));
+        content.addEventListener('mouseleave', () => {
+            if (activeDropdown) {
+                 dropdownTimeout = setTimeout(() => {
+                    activeDropdown.classList.remove('show');
+                    activeDropdown = null;
+                }, 2000);
+            }
+        });
     });
-    document.addEventListener('click', (event) => {
-      if (!dropdown.contains(event.target)) {
-        dropdown.classList.remove('show');
-        clearTimeout(dropdownTimer);
-      }
+
+    document.addEventListener('click', () => {
+        if (activeDropdown) {
+            activeDropdown.classList.remove('show');
+            activeDropdown = null;
+            clearTimeout(dropdownTimeout);
+        }
     });
+    
+    // Theme Switcher Logic
+    const themeToggle = document.getElementById('theme-toggle-checkbox');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+
+    themeToggle.addEventListener('change', () => {
+        triggerHapticFeedback();
+        applyTheme(themeToggle.checked ? 'dark' : 'light');
+    });
+
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            triggerHapticFeedback();
+            applyTheme(btn.dataset.theme);
+        });
+    });
+  }
+
+  function applyTheme(themeName) {
+    document.body.dataset.theme = themeName;
+    localStorage.setItem('youtubePlayerTheme', themeName);
+    updateThemeControls(themeName);
+  }
+
+  function loadTheme() {
+    const savedTheme = localStorage.getItem('youtubePlayerTheme') || 'light';
+    applyTheme(savedTheme);
+  }
+
+  function updateThemeControls(themeName) {
+    const themeToggle = document.getElementById('theme-toggle-checkbox');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    
+    if (themeName === 'dark' || themeName === 'light') {
+        themeToggle.checked = themeName === 'dark';
+        presetBtns.forEach(btn => btn.classList.remove('active'));
+    } else {
+        themeToggle.checked = false;
+        presetBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === themeName);
+        });
+    }
   }
   
   function toggleShuffle() {
     isShuffle = !isShuffle;
     document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
     
-    let playlistToRender;
-    if (isShuffle) {
-        playlistToRender = shuffleArray(currentPlaylist);
+    let listToRender;
+    let isSearchResult = false;
+
+    if (searchInput.value) {
+        const results = fuse.search(searchInput.value);
+        listToRender = results;
+        isSearchResult = true;
     } else {
-        // Nếu đang tìm kiếm, trả về kết quả tìm kiếm, nếu không thì trả về danh sách gốc
-        if (searchInput.value) {
-            const results = fuse.search(searchInput.value);
-            playlistToRender = results.map(r => r.item);
-        } else {
-            playlistToRender = [...originalData];
-        }
+        listToRender = [...originalData];
     }
-    renderPlaylist(playlistToRender, searchInput.value ? fuse.search(searchInput.value) : null);
+    
+    if (isShuffle) {
+        listToRender = shuffleArray(listToRender);
+    }
+    
+    renderPlaylist(listToRender, isSearchResult);
   }
   
   function toggleRepeat() {
