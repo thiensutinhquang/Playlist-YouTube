@@ -7,7 +7,7 @@
   
   <!-- === PWA MANIFEST & THEME === -->
   <meta name="theme-color" content="#c5a043"/>
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGxheSBWaWRlbyBZb3V0dWJlIFRRIiwic2hvcnRfbmFtZSI6IllvdVR1YmUgVFEiLCJzdGFydF91cmwiOiIuLz9zb3VyY2U9cHdhIiwiZGlzcGxheSI6ImJyb3dzZXIiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwidGhlbWVfY29sb3IiOiIjYzVhMDQzIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkZGRkYiLCJkZXNjcmlwdGlvbiI6IlRyw6xuaCBwaMOhdCB2aWRlby9uaOG6oWMgWW91VHViZSBob+G6oXQgxJHhu5VuZyBu4buBbiwgw7NuZyBk4dulbmcgZ+G7kWMuIMSQaeG7gXUga2hp4buDbiB04burIG3DoG4gaMOsbmgha2jDs2EuIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvYzVhMDQzLzhCMDAwMD90ZXh0PVRRJmZvbnQ9aW1wYWN0Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vNTEyeDUxMi9jNWEwNDMvOEIwMDAwP3RleHQ9VFEmdm9udD1pbXBhY3QiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiYmFzZTY0In1dLCJwcmVmZXJfcmVsYXRlZF9hcHBsaWNhdGlvbnMiOmZhbHNlLCJzY29wZSI6Ii8ifQ==">
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGxheSBWaWRlbyBZb3V0dWJlIFRRIiwic2hvcnRfbmFtZSI6IllvdVR1YmUgVFEiLCJzdGFydF91cmwiOiIuLz9zb3VyY2U9cHdhIiwiZGlzcGxheSI6ImJyb3dzZXIiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwidGhlbWVfY29sb3IiOiIjYzVhMDQzIiwiYmFja2dyb3VuZGVfY29sb3IiOiIjRkZGRkZGIiwiZGVzY3JpcHRpb24iOiJUcsOtbmggcGjDoXQgdmlkZW8vbmjhuqFjIFlvdVR1YmUgaG/huqF0IMSRu5VuZyBu4buBbiwgw7NuZyBk4dulbmcgZ+G7kWMuIMSQaeG7gXUga2hp4buDbiB04burIG3DoG4gaMOsbmgha2jDs2EuIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvYzVhMDQzLzhCMDAwMD90ZXh0PVRRJmZvbnQ9aW1wYWN0Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vNTEyeDUxMi9jNWEwNDMvOEIwMDAwP3RleHQ9VFEmdm9udD1pbXBhY3QiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiYmFzZTY0In1dLCJwcmVmZXJfcmVsYXRlZF9hcHBsaWNhdGlvbnMiOmZhbHNlLCJzY29wZSI6Ii8ifQ==">
   <link rel="apple-touch-icon" href="https://placehold.co/180x180/c5a043/8B0000?text=TQ&font=impact">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -461,6 +461,30 @@
         transform: translateY(-5px) scale(1);
     }
 
+    /* No Internet Message */
+    #no-internet-message {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #dc3545; /* Red background for error */
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1001;
+      opacity: 0;
+      transition: opacity 0.3s, bottom 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 500;
+    }
+    #no-internet-message.show {
+      opacity: 1;
+      bottom: 30px;
+    }
+
 
     @media (max-width: 900px) {
       body { padding: 16px; }
@@ -644,6 +668,8 @@
   let videoIdFromUrl = null;
   let resumeState = null;
   let isShuffle = false, repeatMode = 'none';
+  let savedVolume = 100; // Default volume
+  let savedPlaybackRate = 1; // Default playback rate
 
   // Get DOM elements inside init() to ensure they are available
   let backgroundAudioEl;
@@ -660,6 +686,9 @@
   let initialNoVideosMessage; 
   let initialLoadingOverlay; 
   let scrollToTopBtn; 
+  let volumeSlider; 
+  let playbackRateButtons; 
+  let noInternetMessage; 
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
@@ -680,13 +709,33 @@
     initialNoVideosMessage = document.getElementById('initial-no-videos-message'); 
     initialLoadingOverlay = document.getElementById('initial-loading-overlay'); 
     scrollToTopBtn = document.getElementById('scroll-to-top-btn'); 
+    volumeSlider = document.getElementById('volume-slider'); 
+    playbackRateButtons = document.querySelectorAll('.control-btn.text-btn'); 
+    noInternetMessage = document.getElementById('no-internet-message'); 
 
     setupEventListeners();
     loadTheme();
     backgroundAudioEl.src = silentAudio;
 
+    // Load saved shuffle and repeat states
+    isShuffle = localStorage.getItem('isShuffle') === 'true';
+    repeatMode = localStorage.getItem('repeatMode') || 'none';
+    savedVolume = parseInt(localStorage.getItem('savedVolume') || '100', 10); 
+    savedPlaybackRate = parseFloat(localStorage.getItem('savedPlaybackRate') || '1'); 
+    
+    // Update UI based on loaded states
+    document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
+    updateRepeatButtonUI(); 
+    volumeSlider.value = savedVolume; 
+    updatePlaybackRateUI(savedPlaybackRate); 
+
     // Show initial loading overlay
     initialLoadingOverlay.classList.remove('hidden');
+
+    // Check initial network status and set up listeners AFTER DOM elements are retrieved
+    updateNetworkStatus(); // Call it here
+    window.addEventListener('online', updateNetworkStatus);
+    window.addEventListener('offline', updateNetworkStatus);
 
     // Xác thực Firebase
     onAuthStateChanged(auth, async (user) => {
@@ -727,6 +776,10 @@
 
   // Fetch all videos for Fuse.js search (only once)
   async function fetchAllVideosForSearch() {
+    if (!navigator.onLine) {
+      handleFetchError('Không có kết nối Internet. Không thể tải dữ liệu.');
+      return;
+    }
     const videosCollectionRef = collection(db, `videos`);
     const q = query(videosCollectionRef, orderBy('Tên Bài Hát')); 
     try {
@@ -741,10 +794,27 @@
 
   // Load initial paginated videos
   function loadInitialVideos() {
+    if (!navigator.onLine) {
+      handleFetchError('Không có kết nối Internet. Không thể tải dữ liệu ban đầu.');
+      return;
+    }
     const videosCollectionRef = collection(db, `videos`);
-    const q = query(videosCollectionRef, orderBy('Tên Bài Hát'), limit(PAGE_SIZE));
+    let q = query(videosCollectionRef, orderBy('Tên Bài Hát'), limit(PAGE_SIZE));
 
-    // Use a one-time getDocs for initial load to ensure it completes before hiding overlay
+    if (isShuffle && originalData.length > 0) {
+      paginatedData = originalData.slice(0, PAGE_SIZE);
+      lastVisibleDocument = originalData.length > PAGE_SIZE ? originalData[PAGE_SIZE - 1] : null; 
+      renderPlaylist(paginatedData);
+      document.getElementById('loading').style.display = "none"; 
+      updateLoadMoreButton(paginatedData.length);
+
+      if(!resumeState && !videoIdFromUrl) handleInitialPlay();
+      else if (videoIdFromUrl) handleInitialPlay();
+
+      initialLoadingOverlay.classList.add('hidden');
+      return;
+    }
+
     getDocs(q).then((snapshot) => {
       paginatedData = []; 
       snapshot.forEach(doc => {
@@ -753,15 +823,13 @@
       lastVisibleDocument = snapshot.docs[snapshot.docs.length - 1]; 
 
       renderPlaylist(paginatedData);
-      // document.getElementById('loading').style.display = "none"; // This line is now redundant
       updateLoadMoreButton(snapshot.docs.length);
 
-      // Show initial no videos message if originalData is empty
       if (originalData.length === 0) {
         initialNoVideosMessage.style.display = 'block';
         loadMoreBtn.style.display = 'none';
         noMoreVideosMessage.style.display = 'none';
-        noResultsMessage.style.display = 'none'; // Ensure no results message is hidden
+        noResultsMessage.style.display = 'none'; 
       } else {
         initialNoVideosMessage.style.display = 'none';
       }
@@ -769,18 +837,21 @@
       if(!resumeState && !videoIdFromUrl) handleInitialPlay();
       else if (videoIdFromUrl) handleInitialPlay();
 
-      // Hide initial loading overlay after all initial data is processed
       initialLoadingOverlay.classList.add('hidden');
 
     }).catch((error) => {
       console.error("Error fetching initial paginated documents: ", error);
       handleFetchError(`Lỗi khi tải trang video đầu tiên từ Firestore: ${error.message}`);
-      initialLoadingOverlay.classList.add('hidden'); // Hide on error too
+      initialLoadingOverlay.classList.add('hidden'); 
     });
   }
 
   // Load more videos
   async function loadMoreVideos() {
+    if (!navigator.onLine) {
+      handleFetchError('Không có kết nối Internet. Không thể tải thêm dữ liệu.');
+      return;
+    }
     if (!lastVisibleDocument) {
       loadMoreBtn.style.display = 'none'; 
       noMoreVideosMessage.style.display = 'block'; 
@@ -791,7 +862,21 @@
     loadMoreLoading.style.display = 'flex'; 
 
     const videosCollectionRef = collection(db, `videos`);
-    const q = query(videosCollectionRef, orderBy('Tên Bài Hát'), startAfter(lastVisibleDocument), limit(PAGE_SIZE));
+    let q;
+    if (isShuffle) {
+      const startIndex = paginatedData.length;
+      const endIndex = Math.min(startIndex + PAGE_SIZE, originalData.length);
+      const newDocs = originalData.slice(startIndex, endIndex);
+      paginatedData = [...paginatedData, ...newDocs];
+      lastVisibleDocument = endIndex < originalData.length ? originalData[endIndex -1] : null; 
+      
+      renderPlaylist(paginatedData);
+      updateLoadMoreButton(newDocs.length);
+      loadMoreLoading.style.display = 'none';
+      return; 
+    } else {
+      q = query(videosCollectionRef, orderBy('Tên Bài Hát'), startAfter(lastVisibleDocument), limit(PAGE_SIZE));
+    }
 
     try {
       const snapshot = await getDocs(q); 
@@ -943,10 +1028,18 @@
   };
 
   function onPlayerReady(event) {
-    youtubePlayer.setVolume(document.getElementById('volume-slider').value);
+    youtubePlayer.setVolume(savedVolume); 
+    event.target.setPlaybackRate(savedPlaybackRate); 
     event.target.playVideo();
-    const activeRateBtn = document.querySelector('.control-btn.text-btn.active');
-    event.target.setPlaybackRate(parseFloat(activeRateBtn.dataset.rate));
+    
+    playbackRateButtons.forEach(btn => {
+        if (parseFloat(btn.dataset.rate) === savedPlaybackRate) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
     clearInterval(volumeSyncInterval);
     volumeSyncInterval = setInterval(updateVolumeUI, 250);
     adjustLayout(); 
@@ -1057,13 +1150,12 @@
     };
     
     document.querySelector('#player-controls .control-group').addEventListener('click', e => {
-        const btn = e.target.closest('.control-btn');
-        if(btn && btn.classList.contains('text-btn')) {
+        const btn = e.target.closest('.control-btn.text-btn'); 
+        if(btn) {
             triggerHapticFeedback();
             const rate = parseFloat(btn.dataset.rate);
             if (youtubePlayer) youtubePlayer.setPlaybackRate(rate);
-            document.querySelectorAll('.control-btn.text-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+            updatePlaybackRateUI(rate); 
         }
     });
     document.getElementById('shuffle-btn').addEventListener('click', () => {
@@ -1074,7 +1166,11 @@
         triggerHapticFeedback();
         toggleRepeat();
     });
-    document.getElementById('volume-slider').addEventListener('input', (e) => { if (youtubePlayer) youtubePlayer.setVolume(parseInt(e.target.value, 10)); });
+    volumeSlider.addEventListener('input', (e) => { 
+      const newVolume = parseInt(e.target.value, 10);
+      if (youtubePlayer) youtubePlayer.setVolume(newVolume); 
+      localStorage.setItem('savedVolume', newVolume); 
+    });
     document.getElementById('mute-btn').addEventListener('click', () => { 
         triggerHapticFeedback();
         if (youtubePlayer) { youtubePlayer.isMuted() ? youtubePlayer.unMute() : youtubePlayer.mute(); } 
@@ -1148,7 +1244,7 @@
 
     // Scroll to Top button event listener
     songListEl.addEventListener('scroll', () => {
-        if (songListEl.scrollTop > 200) { // Show button after scrolling 200px
+        if (songListEl.scrollTop > 200) { 
             scrollToTopBtn.classList.add('show');
         } else {
             scrollToTopBtn.classList.remove('show');
@@ -1201,7 +1297,6 @@
         themeToggle.checked = themeName === 'dark';
         presetBtns.forEach(btn => btn.classList.remove('active'));
     } else {
-        themeToggle.checked = false;
         presetBtns.forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === themeName);
         });
@@ -1211,18 +1306,16 @@
   function toggleShuffle() {
     isShuffle = !isShuffle;
     document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
-    localStorage.setItem('isShuffle', isShuffle); // Save shuffle state
+    localStorage.setItem('isShuffle', isShuffle); 
     
     if (isShuffle) {
-        // When shuffling, we re-shuffle the entire originalData and reset pagination
         originalData = shuffleArray(originalData);
-        lastVisibleDocument = null; // Reset pagination
-        loadInitialVideos(); // Load the first page of the shuffled list
+        lastVisibleDocument = null; 
+        loadInitialVideos(); 
     } else {
-        // If un-shuffling, re-sort originalData by 'Tên Bài Hát' and reset pagination
         originalData.sort((a, b) => a["Tên Bài Hát"].localeCompare(b["Tên Bài Hát"]));
-        lastVisibleDocument = null; // Reset pagination
-        loadInitialVideos(); // Load the first page of the sorted list
+        lastVisibleDocument = null; 
+        loadInitialVideos(); 
     }
   }
   
@@ -1230,6 +1323,15 @@
     const repeatBtn = document.getElementById('repeat-btn');
     const modes = ['none', 'all', 'one'];
     repeatMode = modes[(modes.indexOf(repeatMode) + 1) % modes.length];
+    
+    updateRepeatButtonUI(); 
+    localStorage.setItem('repeatMode', repeatMode); 
+  }
+
+  function updateRepeatButtonUI() {
+    const repeatBtn = document.getElementById('repeat-btn');
+    if (!repeatBtn) return; 
+
     repeatBtn.classList.toggle('active', repeatMode !== 'none');
     if (repeatMode === 'one') {
       repeatBtn.innerHTML = `<i data-lucide="repeat-1"></i>`;
@@ -1238,8 +1340,18 @@
       repeatBtn.innerHTML = `<i data-lucide="repeat"></i>`;
       repeatBtn.title = repeatMode === 'all' ? 'Lặp lại danh sách' : 'Tắt lặp lại';
     }
-    lucide.createIcons();
-    localStorage.setItem('repeatMode', repeatMode); // Save repeat state
+    lucide.createIcons(); 
+  }
+
+  function updatePlaybackRateUI(rate) {
+    playbackRateButtons.forEach(btn => {
+        if (parseFloat(btn.dataset.rate) === rate) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    localStorage.setItem('savedPlaybackRate', rate); 
   }
     
   function updateVolumeUI() {
@@ -1320,6 +1432,7 @@
   function handleFetchError(err) {
     const currentErrorDisplay = document.getElementById('err');
     const currentInitialLoadingOverlay = document.getElementById('initial-loading-overlay');
+    const currentNoInternetMessage = document.getElementById('no-internet-message'); 
 
     if (currentErrorDisplay) { 
       currentErrorDisplay.textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
@@ -1329,6 +1442,10 @@
     }
     if (currentInitialLoadingOverlay) {
       currentInitialLoadingOverlay.classList.add('hidden'); 
+    }
+    // Show no internet message if the error is network related
+    if (currentNoInternetMessage && (err.message.includes('Network') || err.message.includes('Internet') || err.message.includes('Failed to fetch'))) {
+      currentNoInternetMessage.classList.add('show');
     }
   }
   
@@ -1404,6 +1521,26 @@
               localStorage.setItem('youtubePlayerState', JSON.stringify(state));
           }
       }
+  }
+
+  // New function to update network status message
+  function updateNetworkStatus() {
+    // Ensure noInternetMessage is available before trying to use it
+    const currentNoInternetMessage = document.getElementById('no-internet-message');
+    if (!currentNoInternetMessage) {
+        console.warn("No internet message element not found.");
+        return;
+    }
+
+    if (navigator.onLine) {
+      currentNoInternetMessage.classList.remove('show');
+      // Optionally, re-fetch data if it was previously offline
+      if (originalData.length === 0 && !searchInput.value) { // Only re-fetch if list is empty and not searching
+        loadInitialVideos();
+      }
+    } else {
+      currentNoInternetMessage.classList.add('show');
+    }
   }
 </script>
 </body>
