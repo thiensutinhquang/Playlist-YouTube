@@ -193,7 +193,18 @@
     #song-list li.playing .share-btn .lucide { stroke: var(--accent-color); }
     /* =========================================== */
 
-    #player-wrapper { position: relative; width: 100%; aspect-ratio: 16 / 9; background-color: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    #player-wrapper { 
+      position: relative; 
+      width: 100%; 
+      aspect-ratio: 16 / 9; 
+      background-color: #000; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+      display: flex; /* Use flexbox to center content */
+      justify-content: center;
+      align-items: center;
+    }
     #player { width: 100%; height: 100%; }
     #player-controls { margin-top: 16px; display: flex; justify-content: center; align-items: center; gap: 24px; padding: 12px; border-radius: 12px; flex-wrap: wrap; }
     .control-group { display: flex; align-items: center; gap: 10px; }
@@ -389,12 +400,23 @@
       font-style: italic;
       display: none; /* Mặc định ẩn */
     }
-    #initial-no-videos-message {
+    .info-message { /* New class for common info messages */
       text-align: center;
-      padding: 40px 20px;
+      padding: 15px 20px; /* Increased padding */
       color: var(--text-secondary);
       font-style: italic;
       display: none; /* Mặc định ẩn */
+      font-size: 1.1em; /* Slightly larger text */
+      margin: 10px auto;
+      border: 1px solid var(--border-color); /* Add a border */
+      border-radius: 8px; /* Rounded corners */
+      background-color: var(--hover-bg); /* Light background */
+      box-shadow: 0 2px 5px var(--shadow-color); /* Subtle shadow */
+      display: flex; /* Keep flex for icon alignment */
+      align-items: center;
+      justify-content: center; /* Center content horizontally */
+      gap: 10px;
+      max-width: 80%; /* Limit width */
     }
     /* New CSS for initial loading overlay */
     #initial-loading-overlay {
@@ -485,6 +507,85 @@
       bottom: 30px;
     }
 
+    /* Search loading spinner */
+    #search-loading-spinner {
+      position: absolute;
+      right: 40px; /* Position next to clear search button */
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex; /* Changed to flex to center spinner and text */
+      align-items: center;
+      gap: 8px; /* Space between spinner and text */
+      color: var(--text-secondary);
+      font-size: 0.9em;
+      opacity: 0; /* Hidden by default */
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    #search-loading-spinner.show {
+      opacity: 1;
+    }
+    #search-loading-spinner .spinner {
+      width: 16px; /* Smaller spinner for search */
+      height: 16px;
+      border-width: 2px; /* Thinner border */
+    }
+
+    /* Video loading spinner */
+    #video-loading-spinner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10; /* Above the player, below error messages */
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none; /* Allow clicks to pass through when hidden */
+    }
+    #video-loading-spinner.show {
+      opacity: 1;
+      pointer-events: auto; /* Block clicks when visible */
+    }
+    #video-loading-spinner .spinner {
+      width: 60px; /* Larger spinner for video loading */
+      height: 60px;
+      border-width: 8px; /* Thicker border */
+    }
+
+    /* Now Playing Display */
+    .now-playing-display-style {
+      background-color: var(--hover-bg); /* Light background, matching hover state */
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 15px;
+      margin-top: 16px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--accent-color); /* Emphasize with accent color */
+      white-space: nowrap; /* Prevent text wrapping */
+      overflow: hidden; /* Hide overflow */
+      text-overflow: ellipsis; /* Add ellipsis for overflow */
+      position: relative; /* For marquee effect */
+      box-shadow: 0 2px 8px var(--shadow-color);
+    }
+
+    #now-playing-text {
+      display: inline-block; /* Required for marquee */
+      animation: marquee 15s linear infinite; /* Marquee animation */
+      animation-play-state: paused; /* Pause by default */
+      padding-left: 100%; /* Start off-screen */
+    }
+
+    /* Only animate if text overflows */
+    .now-playing-display-style:hover #now-playing-text {
+      animation-play-state: running; /* Run on hover */
+    }
+
 
     @media (max-width: 900px) {
       body { padding: 16px; }
@@ -563,6 +664,9 @@
       <div id="search-wrapper">
         <span class="search-icon"><i data-lucide="search"></i></span>
         <input type="search" id="search-input" placeholder="Tìm kiếm thông minh (hỗ trợ gõ tắt)...">
+        <div id="search-loading-spinner" style="display: none;">
+          <div class="spinner"></div> <span>Đang tìm kiếm...</span>
+        </div>
         <button id="clear-search-btn" title="Xóa"><i data-lucide="x"></i></button>
       </div>
       <div id="song-list-container">
@@ -572,15 +676,24 @@
         <div id="load-more-loading" style="display: none;">
           <div class="spinner"></div> <span>Đang tải...</span>
         </div>
-        <div id="no-more-videos-message" style="display: none;">Đã tải hết tất cả video.</div>
-        <div id="no-results-message" style="display: none;"></div>
-        <div id="initial-no-videos-message" style="display: none;">Không có video nào trong danh sách.</div>
+        <div id="no-more-videos-message" class="info-message"><i data-lucide="check-circle"></i> Đã tải hết tất cả video.</div>
+        <div id="no-results-message" class="info-message"><i data-lucide="info"></i></div>
+        <div id="initial-no-videos-message" class="info-message"><i data-lucide="info"></i> Không có video nào trong danh sách.</div>
         <button id="scroll-to-top-btn" title="Cuộn lên đầu"><i data-lucide="arrow-up"></i></button>
       </div>
       <div id="err" class="error" style="display:none;"></div>
     </div>
     <div id="player-column">
-      <div id="player-wrapper"><div id="player"></div></div>
+      <div id="player-wrapper">
+        <div id="player"></div>
+        <div id="video-error-display" class="info-message" style="display: none;"><i data-lucide="alert-triangle"></i></div>
+        <div id="video-loading-spinner" style="display: none;">
+          <div class="spinner"></div>
+        </div>
+      </div>
+      <div id="now-playing-display" class="now-playing-display-style">
+        <span id="now-playing-text">Chưa có video nào đang phát.</span>
+      </div>
       <div id="player-controls">
         <div class="control-group">
           <button class="control-btn text-btn" data-rate="0.5">0.5x</button>
@@ -670,6 +783,7 @@
   let isShuffle = false, repeatMode = 'none';
   let savedVolume = 100; // Default volume
   let savedPlaybackRate = 1; // Default playback rate
+  let currentPlayingIndex = -1; // Track currently playing video index for keyboard navigation
 
   // Get DOM elements inside init() to ensure they are available
   let backgroundAudioEl;
@@ -689,6 +803,11 @@
   let volumeSlider; 
   let playbackRateButtons; 
   let noInternetMessage; 
+  let searchLoadingSpinner; 
+  let videoErrorDisplay; 
+  let videoLoadingSpinner; 
+  let nowPlayingDisplay; 
+  let nowPlayingText; 
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
@@ -712,6 +831,11 @@
     volumeSlider = document.getElementById('volume-slider'); 
     playbackRateButtons = document.querySelectorAll('.control-btn.text-btn'); 
     noInternetMessage = document.getElementById('no-internet-message'); 
+    searchLoadingSpinner = document.getElementById('search-loading-spinner'); 
+    videoErrorDisplay = document.getElementById('video-error-display'); 
+    videoLoadingSpinner = document.getElementById('video-loading-spinner'); 
+    nowPlayingDisplay = document.getElementById('now-playing-display'); 
+    nowPlayingText = document.getElementById('now-playing-text'); 
 
     setupEventListeners();
     loadTheme();
@@ -733,7 +857,7 @@
     initialLoadingOverlay.classList.remove('hidden');
 
     // Check initial network status and set up listeners AFTER DOM elements are retrieved
-    updateNetworkStatus(); // Call it here
+    updateNetworkStatus(); 
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
 
@@ -826,12 +950,9 @@
       updateLoadMoreButton(snapshot.docs.length);
 
       if (originalData.length === 0) {
-        initialNoVideosMessage.style.display = 'block';
-        loadMoreBtn.style.display = 'none';
-        noMoreVideosMessage.style.display = 'none';
-        noResultsMessage.style.display = 'none'; 
+        updateInfoMessages('initialNoVideos', true); 
       } else {
-        initialNoVideosMessage.style.display = 'none';
+        updateInfoMessages('initialNoVideos', false); 
       }
 
       if(!resumeState && !videoIdFromUrl) handleInitialPlay();
@@ -853,8 +974,8 @@
       return;
     }
     if (!lastVisibleDocument) {
+      updateInfoMessages('noMoreVideos', true); 
       loadMoreBtn.style.display = 'none'; 
-      noMoreVideosMessage.style.display = 'block'; 
       return;
     }
 
@@ -899,10 +1020,10 @@
   function updateLoadMoreButton(loadedCount) {
     if (loadedCount < PAGE_SIZE) {
       loadMoreBtn.style.display = 'none';
-      noMoreVideosMessage.style.display = 'block'; 
+      updateInfoMessages('noMoreVideos', true); 
     } else {
       loadMoreBtn.style.display = 'block';
-      noMoreVideosMessage.style.display = 'none'; 
+      updateInfoMessages('noMoreVideos', false); 
     }
   }
 
@@ -920,18 +1041,15 @@
 
   function renderPlaylist(playlistData, isSearchResult = false) {
     songListEl.innerHTML = ''; 
-    noResultsMessage.style.display = 'none';
-    noMoreVideosMessage.style.display = 'none'; 
-    initialNoVideosMessage.style.display = 'none'; 
+    updateInfoMessages('all', false); // Hide all info messages initially
 
     const dataToRender = isSearchResult ? playlistData.map(r => r.item) : playlistData;
 
     if (dataToRender.length === 0) { 
         if (searchInput.value) { 
-            noResultsMessage.style.display = 'block';
-            noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
+            updateInfoMessages('noResults', true, `Không tìm thấy kết quả cho "${searchInput.value}"`);
         } else { 
-            initialNoVideosMessage.style.display = 'block';
+            updateInfoMessages('initialNoVideos', true);
         }
         loadMoreBtn.style.display = 'none'; 
         scrollToTopBtn.classList.remove('show'); 
@@ -985,6 +1103,10 @@
   }
 
   function playVideo(videoId, title, startTime = 0) {
+      // Hide video-specific error message when a new video starts playing
+      updateInfoMessages('videoError', false); 
+      updateInfoMessages('videoLoading', true); // Show video loading spinner
+
       document.querySelectorAll('#song-list li').forEach(el => el.classList.remove('playing'));
       const targetLi = songListEl.querySelector(`li[data-video-id="${videoId}"]`);
       if (targetLi) {
@@ -992,16 +1114,46 @@
           targetLi.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       updateMediaSession(title, videoId);
+      updateNowPlayingDisplay(title); // Update now playing display
       const playerVars = { 'autoplay': 1, 'rel': 0, 'start': Math.floor(startTime) };
       if (youtubePlayer && typeof youtubePlayer.loadVideoById === 'function') {
           youtubePlayer.loadVideoById({ videoId: videoId, startSeconds: playerVars.start });
       } else {
           youtubePlayer = new YT.Player('player', {
               height: '100%', width: '100%', videoId: videoId, playerVars: playerVars,
-              events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+              events: { 
+                'onReady': onPlayerReady, 
+                'onStateChange': onPlayerStateChange,
+                'onError': onPlayerError 
+              }
           });
       }
   }
+
+  // New function to handle YouTube player errors
+  function onPlayerError(event) {
+    let errorMessage = 'Đã xảy ra lỗi khi tải video.';
+    switch (event.data) {
+      case 2:
+        errorMessage = 'ID video không hợp lệ hoặc video không tồn tại.';
+        break;
+      case 5:
+        errorMessage = 'Lỗi HTML5 player.';
+        break;
+      case 100:
+        errorMessage = 'Video không khả dụng (đã bị xóa hoặc riêng tư).';
+        break;
+      case 101:
+      case 150:
+        errorMessage = 'Video không thể phát trong trình nhúng này.';
+        break;
+    }
+    updateInfoMessages('videoError', true, `Lỗi: ${errorMessage}`); 
+    updateInfoMessages('videoLoading', false); 
+    updateNowPlayingDisplay(`Lỗi video: ${errorMessage}`); // Update now playing display with error
+    console.error("YouTube Player Error:", event.data, errorMessage);
+  }
+
 
   const manageWakeLock = async (shouldBeActive) => {
     if (!('wakeLock' in navigator)) { return; }
@@ -1047,6 +1199,17 @@
 
   function onPlayerStateChange(event) {
     const playerState = event.data;
+    // Hide video loading spinner and error message based on player state
+    if (playerState === YT.PlayerState.PLAYING) {
+        updateInfoMessages('videoLoading', false); 
+        updateInfoMessages('videoError', false); 
+    } else if (playerState === YT.PlayerState.BUFFERING) {
+        updateInfoMessages('videoLoading', true); 
+        updateInfoMessages('videoError', false); 
+    } else {
+        updateInfoMessages('videoLoading', false); 
+    }
+
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = (playerState === YT.PlayerState.PLAYING) ? 'playing' : 'paused';
     }
@@ -1114,18 +1277,23 @@
     searchInput.addEventListener('input', e => {
         const searchTerm = e.target.value;
         clearSearchBtn.style.display = searchTerm ? 'block' : 'none';
+        if (searchTerm) {
+            updateInfoMessages('searchLoading', true); 
+        } else {
+            updateInfoMessages('searchLoading', false); 
+        }
+
         if (!searchTerm) {
             renderPlaylist(paginatedData); 
             loadMoreBtn.style.display = 'block'; 
-            noMoreVideosMessage.style.display = 'none'; 
-            initialNoVideosMessage.style.display = 'none'; 
+            updateInfoMessages('all', false); 
             return;
         }
         const results = fuse.search(searchTerm);
         renderPlaylist(results, true);
         loadMoreBtn.style.display = 'none'; 
-        noMoreVideosMessage.style.display = 'none'; 
-        initialNoVideosMessage.style.display = 'none'; 
+        updateInfoMessages('all', false); 
+        updateInfoMessages('searchLoading', false); 
     });
 
     clearSearchBtn.addEventListener('click', () => {
@@ -1135,8 +1303,8 @@
         clearSearchBtn.style.display = 'none';
         renderPlaylist(paginatedData); 
         loadMoreBtn.style.display = 'block'; 
-        noMoreVideosMessage.style.display = 'none'; 
-        initialNoVideosMessage.style.display = 'none'; 
+        updateInfoMessages('all', false); 
+        updateInfoMessages('searchLoading', false); 
     });
     
     document.getElementById('resume-yes').onclick = () => {
@@ -1368,15 +1536,81 @@
   }
 
   function handleKeyboardShortcuts(e) {
-    if (e.target === searchInput || !youtubePlayer || typeof youtubePlayer.getPlayerState !== 'function') return;
-    const playerState = youtubePlayer.getPlayerState();
+    if (e.target === searchInput || !songListEl) return; 
+
+    const currentlyPlayingLi = songListEl.querySelector('li.playing');
+    let currentActiveLi = songListEl.querySelector('li.active-nav'); 
+    
+    if (!currentActiveLi && currentlyPlayingLi) {
+        currentActiveLi = currentlyPlayingLi;
+        currentActiveLi.classList.add('active-nav');
+    } else if (!currentActiveLi && songListEl.firstElementChild) {
+        currentActiveLi = songListEl.firstElementChild;
+        currentActiveLi.classList.add('active-nav');
+    }
+
+    if (!currentActiveLi) return; 
+
+    let nextLi = null;
+
     switch(e.code) {
-        case 'Space': e.preventDefault(); if (playerState === YT.PlayerState.PLAYING) youtubePlayer.pauseVideo(); else youtubePlayer.playVideo(); break;
-        case 'KeyM': document.getElementById('mute-btn').click(); break;
-        case 'ArrowRight': handleVideoEnd(); break;
-        case 'ArrowLeft': songListEl.querySelector('li.playing')?.previousElementSibling?.click(); break;
-        case 'ArrowUp': e.preventDefault(); youtubePlayer.setVolume(Math.min(youtubePlayer.getVolume() + 5, 100)); break;
-        case 'ArrowDown': e.preventDefault(); youtubePlayer.setVolume(Math.max(youtubePlayer.getVolume() - 5, 0)); break;
+        case 'Space': 
+            e.preventDefault(); 
+            if (youtubePlayer) {
+                if (youtubePlayer.getPlayerState() === YT.PlayerState.PLAYING) youtubePlayer.pauseVideo(); 
+                else youtubePlayer.playVideo();
+            }
+            break;
+        case 'KeyM': 
+            if (document.getElementById('mute-btn')) document.getElementById('mute-btn').click(); 
+            break;
+        case 'ArrowRight': 
+            handleVideoEnd(); 
+            break;
+        case 'ArrowLeft': 
+            const prevLi = songListEl.querySelector('li.playing')?.previousElementSibling;
+            if (prevLi) {
+                prevLi.click();
+            }
+            break;
+        case 'ArrowDown':
+            e.preventDefault(); 
+            if (currentActiveLi) {
+                nextLi = currentActiveLi.nextElementSibling;
+                if (nextLi) {
+                    currentActiveLi.classList.remove('active-nav');
+                    nextLi.classList.add('active-nav');
+                    nextLi.scrollIntoView({ block: 'nearest' });
+                }
+            }
+            break;
+        case 'ArrowUp':
+            e.preventDefault(); 
+            if (currentActiveLi) {
+                nextLi = currentActiveLi.previousElementSibling;
+                if (nextLi) {
+                    currentActiveLi.classList.remove('active-nav');
+                    nextLi.classList.add('active-nav');
+                    nextLi.scrollIntoView({ block: 'nearest' });
+                }
+            }
+            break;
+        case 'Enter':
+            e.preventDefault(); 
+            if (currentActiveLi) {
+                currentActiveLi.click(); 
+            }
+            break;
+        case 'NumpadAdd':
+        case 'Equal': 
+            e.preventDefault();
+            if (youtubePlayer) youtubePlayer.setVolume(Math.min(youtubePlayer.getVolume() + 5, 100));
+            break;
+        case 'NumpadSubtract':
+        case 'Minus': 
+            e.preventDefault();
+            if (youtubePlayer) youtubePlayer.setVolume(Math.max(youtubePlayer.getVolume() - 5, 0));
+            break;
     }
   }
 
@@ -1429,23 +1663,84 @@
     }
   }
 
-  function handleFetchError(err) {
-    const currentErrorDisplay = document.getElementById('err');
-    const currentInitialLoadingOverlay = document.getElementById('initial-loading-overlay');
-    const currentNoInternetMessage = document.getElementById('no-internet-message'); 
+  // Helper function to manage info messages
+  function updateInfoMessages(type, show, message = '') {
+    // Hide all messages first
+    if (noResultsMessage) noResultsMessage.style.display = 'none';
+    if (noMoreVideosMessage) noMoreVideosMessage.style.display = 'none';
+    if (initialNoVideosMessage) initialNoVideosMessage.style.display = 'none';
+    if (errorDisplay) errorDisplay.style.display = 'none'; 
+    if (noInternetMessage) noInternetMessage.classList.remove('show'); 
+    if (searchLoadingSpinner) searchLoadingSpinner.style.display = 'none'; 
+    if (videoErrorDisplay) videoErrorDisplay.style.display = 'none'; 
+    if (videoLoadingSpinner) videoLoadingSpinner.style.display = 'none'; 
 
-    if (currentErrorDisplay) { 
-      currentErrorDisplay.textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
-      currentErrorDisplay.style.display = 'block';
+    if (show) {
+      switch (type) {
+        case 'noResults':
+          if (noResultsMessage) {
+            noResultsMessage.innerHTML = `<i data-lucide="info"></i> ${message}`; 
+            noResultsMessage.style.display = 'block';
+          }
+          break;
+        case 'noMoreVideos':
+          if (noMoreVideosMessage) noMoreVideosMessage.style.display = 'block';
+          break;
+        case 'initialNoVideos':
+          if (initialNoVideosMessage) initialNoVideosMessage.style.display = 'block';
+          break;
+        case 'error': 
+          if (errorDisplay) {
+            errorDisplay.textContent = message;
+            errorDisplay.style.display = 'block';
+          }
+          break;
+        case 'noInternet': 
+          if (noInternetMessage) noInternetMessage.innerHTML = `<i data-lucide="wifi-off"></i> ${message}`; 
+          if (noInternetMessage) noInternetMessage.classList.add('show');
+          break;
+        case 'searchLoading': 
+          if (searchLoadingSpinner) searchLoadingSpinner.style.display = 'flex'; 
+          break;
+        case 'videoError': 
+          if (videoErrorDisplay) {
+            videoErrorDisplay.innerHTML = `<i data-lucide="alert-triangle"></i> ${message}`;
+            videoErrorDisplay.style.display = 'flex'; 
+          }
+          break;
+        case 'videoLoading': 
+          if (videoLoadingSpinner) videoLoadingSpinner.style.display = 'flex';
+          break;
+        case 'all': 
+          // Already hidden above
+          break;
+      }
+    } else if (type === 'all') {
+        // Already hidden above
     } else {
-      console.error("Error display element not found!", err);
+        // Hide specific message if show is false
+        switch (type) {
+            case 'noResults': if (noResultsMessage) noResultsMessage.style.display = 'none'; break;
+            case 'noMoreVideos': if (noMoreVideosMessage) noMoreVideosMessage.style.display = 'none'; break;
+            case 'initialNoVideos': if (initialNoVideosMessage) initialNoVideosMessage.style.display = 'none'; break;
+            case 'error': if (errorDisplay) errorDisplay.style.display = 'none'; break;
+            case 'noInternet': if (noInternetMessage) noInternetMessage.classList.remove('show'); break;
+            case 'searchLoading': if (searchLoadingSpinner) searchLoadingSpinner.style.display = 'none'; break;
+            case 'videoError': if (videoErrorDisplay) videoErrorDisplay.style.display = 'none'; break;
+            case 'videoLoading': if (videoLoadingSpinner) videoLoadingSpinner.style.display = 'none'; break;
+        }
     }
-    if (currentInitialLoadingOverlay) {
-      currentInitialLoadingOverlay.classList.add('hidden'); 
+    lucide.createIcons(); 
+  }
+
+  function handleFetchError(err) {
+    console.error("Error during fetch operation:", err);
+    updateInfoMessages('error', true, `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err.message || err}`);
+    if (initialLoadingOverlay) { 
+      initialLoadingOverlay.classList.add('hidden'); 
     }
-    // Show no internet message if the error is network related
-    if (currentNoInternetMessage && (err.message.includes('Network') || err.message.includes('Internet') || err.message.includes('Failed to fetch'))) {
-      currentNoInternetMessage.classList.add('show');
+    if (err.message.includes('Network') || err.message.includes('Internet') || err.message.includes('Failed to fetch')) {
+      updateInfoMessages('noInternet', true, 'Không có kết nối Internet.'); 
     }
   }
   
@@ -1474,6 +1769,14 @@
         triggerHapticFeedback(50);
         playVideo(videoId, title, 0);
       };
+      // Add active-nav class for keyboard navigation
+      li.addEventListener('mouseenter', () => {
+          document.querySelectorAll('#song-list li.active-nav').forEach(el => el.classList.remove('active-nav'));
+          li.classList.add('active-nav');
+      });
+      li.addEventListener('mouseleave', () => {
+          li.classList.remove('active-nav');
+      });
       
       li.innerHTML = `
         <div class="video-top-line">
@@ -1525,21 +1828,36 @@
 
   // New function to update network status message
   function updateNetworkStatus() {
-    // Ensure noInternetMessage is available before trying to use it
-    const currentNoInternetMessage = document.getElementById('no-internet-message');
-    if (!currentNoInternetMessage) {
-        console.warn("No internet message element not found.");
-        return;
-    }
-
     if (navigator.onLine) {
-      currentNoInternetMessage.classList.remove('show');
-      // Optionally, re-fetch data if it was previously offline
-      if (originalData.length === 0 && !searchInput.value) { // Only re-fetch if list is empty and not searching
+      updateInfoMessages('noInternet', false); 
+      if (originalData.length === 0 && !searchInput.value) { 
         loadInitialVideos();
       }
     } else {
-      currentNoInternetMessage.classList.add('show');
+      updateInfoMessages('noInternet', true, 'Không có kết nối Internet.'); 
+    }
+  }
+
+  // Function to update the "Now Playing" display
+  function updateNowPlayingDisplay(title) {
+    if (nowPlayingText) {
+      nowPlayingText.textContent = `Đang phát: ${title}`;
+      // Check if text overflows and apply marquee if needed
+      // To properly check for overflow, the element must be rendered and have a computed width.
+      // This might require a slight delay or checking after a reflow.
+      // For simplicity, we'll assume the layout is stable after initial render.
+      const parentWidth = nowPlayingDisplay.clientWidth; // Use nowPlayingDisplay as the container
+      const textWidth = nowPlayingText.scrollWidth;
+
+      if (textWidth > parentWidth) {
+          nowPlayingText.style.animation = 'marquee 15s linear infinite';
+          nowPlayingText.style.animationPlayState = 'running';
+          nowPlayingText.style.paddingLeft = '100%'; // Start off-screen
+      } else {
+          nowPlayingText.style.animation = 'none'; // Remove animation
+          nowPlayingText.style.transform = 'translateX(0)'; // Reset position
+          nowPlayingText.style.paddingLeft = '0'; // Reset padding
+      }
     }
   }
 </script>
