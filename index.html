@@ -129,6 +129,7 @@
 
     /* === NÂNG CẤP BỐ CỤC DANH SÁCH BÀI HÁT (2 DÒNG) === */
     #song-list-container { 
+      position: relative; /* For scroll-to-top button positioning */
       border-radius: 12px; 
       overflow: hidden; 
       flex-grow: 1; 
@@ -200,7 +201,7 @@
     .control-btn.text-btn { width: auto; padding: 6px 14px; }
     #volume-slider::-webkit-slider-thumb { background: var(--accent-color); }
     #volume-slider::-moz-range-thumb { background: var(--accent-color); }
-    .loader { border: 4px solid var(--hover-bg); border-top: 4px solid var(--accent-color); }
+    .loader { border: 4px solid var(--hover-bg); border-top: 4px solid var(--accent-color); } 
     
     .copied-toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: var(--text-primary); color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); z-index: 1001; opacity: 0; transition: opacity 0.3s, bottom 0.3s; }
     .copied-toast.show { opacity: 1; bottom: 30px; }
@@ -371,7 +372,7 @@
     /* Spinner CSS */
     .spinner {
       border: 4px solid var(--border-color);
-      border-top: 4px solid var(--accent-color);
+      border-top: 4px solid var(--accent-color); 
       border-radius: 50%;
       width: 20px;
       height: 20px;
@@ -395,6 +396,70 @@
       font-style: italic;
       display: none; /* Mặc định ẩn */
     }
+    /* New CSS for initial loading overlay */
+    #initial-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: var(--primary-bg); /* Match body background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 1000; /* Above everything else */
+      transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+    }
+    #initial-loading-overlay.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+    #initial-loading-overlay .spinner {
+      width: 50px; /* Larger spinner for initial load */
+      height: 50px;
+      border-width: 6px; /* Thicker border */
+    }
+    #initial-loading-overlay span {
+      font-size: 1.2em;
+      color: var(--text-primary);
+    }
+
+    /* Scroll to Top Button */
+    #scroll-to-top-btn {
+        position: absolute; /* Position relative to song-list-container */
+        bottom: 20px;
+        right: 20px;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.5em;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        transition: opacity 0.3s ease, transform 0.2s ease;
+        opacity: 0; /* Hidden by default */
+        pointer-events: none; /* Don't block clicks when hidden */
+        z-index: 999; /* Below overlay, above other content */
+    }
+    #scroll-to-top-btn.show {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(-5px);
+    }
+    #scroll-to-top-btn:hover {
+        transform: translateY(-8px) scale(1.05);
+        background-color: #d4a74a;
+    }
+    #scroll-to-top-btn:active {
+        transform: translateY(-5px) scale(1);
+    }
 
 
     @media (max-width: 900px) {
@@ -410,6 +475,12 @@
   </style>
 </head>
 <body data-theme="light">
+<!-- Initial Loading Overlay -->
+<div id="initial-loading-overlay">
+  <div class="spinner"></div>
+  <span>Đang tải dữ liệu...</span>
+</div>
+
 <div id="main-container">
   <div class="main-header-container">
     <div class="app-title-container">
@@ -471,7 +542,7 @@
         <button id="clear-search-btn" title="Xóa"><i data-lucide="x"></i></button>
       </div>
       <div id="song-list-container">
-        <div id="loading" class="loader-container"><div class="loader"></div></div>
+        <!-- Removed initial loading spinner from here, moved to overlay -->
         <ul id="song-list"></ul>
         <button id="load-more-btn" style="display: none;">Tải thêm</button>
         <div id="load-more-loading" style="display: none;">
@@ -480,6 +551,7 @@
         <div id="no-more-videos-message" style="display: none;">Đã tải hết tất cả video.</div>
         <div id="no-results-message" style="display: none;"></div>
         <div id="initial-no-videos-message" style="display: none;">Không có video nào trong danh sách.</div>
+        <button id="scroll-to-top-btn" title="Cuộn lên đầu"><i data-lucide="arrow-up"></i></button>
       </div>
       <div id="err" class="error" style="display:none;"></div>
     </div>
@@ -546,7 +618,7 @@
   };
   
   // Biến toàn cục được cung cấp bởi môi trường Canvas
-  const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+  const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; 
 
   // Khởi tạo Firebase
   const app = initializeApp(firebaseConfig);
@@ -573,26 +645,48 @@
   let resumeState = null;
   let isShuffle = false, repeatMode = 'none';
 
-  const backgroundAudioEl = document.getElementById('background-audio');
-  const songListEl = document.getElementById('song-list');
-  const installButton = document.getElementById('install-pwa-btn');
-  const searchInput = document.getElementById('search-input');
-  const clearSearchBtn = document.getElementById('clear-search-btn');
-  const noResultsMessage = document.getElementById('no-results-message');
-  const resumeOverlay = document.getElementById('resume-overlay');
-  const errorDisplay = document.getElementById('err');
-  const loadMoreBtn = document.getElementById('load-more-btn');
-  const loadMoreLoading = document.getElementById('load-more-loading');
-  const noMoreVideosMessage = document.getElementById('no-more-videos-message'); 
-  const initialNoVideosMessage = document.getElementById('initial-no-videos-message'); // New element reference
+  // Get DOM elements inside init() to ensure they are available
+  let backgroundAudioEl;
+  let songListEl;
+  let installButton;
+  let searchInput;
+  let clearSearchBtn;
+  let noResultsMessage;
+  let resumeOverlay;
+  let errorDisplay;
+  let loadMoreBtn;
+  let loadMoreLoading;
+  let noMoreVideosMessage; 
+  let initialNoVideosMessage; 
+  let initialLoadingOverlay; 
+  let scrollToTopBtn; // New element reference
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
 
   async function init() {
+    // Get DOM elements here
+    backgroundAudioEl = document.getElementById('background-audio');
+    songListEl = document.getElementById('song-list');
+    installButton = document.getElementById('install-pwa-btn');
+    searchInput = document.getElementById('search-input');
+    clearSearchBtn = document.getElementById('clear-search-btn');
+    noResultsMessage = document.getElementById('no-results-message');
+    resumeOverlay = document.getElementById('resume-overlay');
+    errorDisplay = document.getElementById('err');
+    loadMoreBtn = document.getElementById('load-more-btn');
+    loadMoreLoading = document.getElementById('load-more-loading');
+    noMoreVideosMessage = document.getElementById('no-more-videos-message'); 
+    initialNoVideosMessage = document.getElementById('initial-no-videos-message'); 
+    initialLoadingOverlay = document.getElementById('initial-loading-overlay'); 
+    scrollToTopBtn = document.getElementById('scroll-to-top-btn'); // Get the new button
+
     setupEventListeners();
     loadTheme();
     backgroundAudioEl.src = silentAudio;
+
+    // Show initial loading overlay
+    initialLoadingOverlay.classList.remove('hidden');
 
     // Xác thực Firebase
     onAuthStateChanged(auth, async (user) => {
@@ -615,6 +709,9 @@
         } catch (error) {
           console.error("Firebase authentication error:", error);
           handleFetchError(`Lỗi xác thực Firebase: ${error.message}`);
+        } finally {
+          // Hide initial loading overlay even if auth fails
+          initialLoadingOverlay.classList.add('hidden');
         }
       }
     });
@@ -647,15 +744,16 @@
     const videosCollectionRef = collection(db, `videos`);
     const q = query(videosCollectionRef, orderBy('Tên Bài Hát'), limit(PAGE_SIZE));
 
-    onSnapshot(q, (snapshot) => {
-      paginatedData = []; // Clear previous paginated data
+    // Use a one-time getDocs for initial load to ensure it completes before hiding overlay
+    getDocs(q).then((snapshot) => {
+      paginatedData = []; 
       snapshot.forEach(doc => {
         paginatedData.push(doc.data());
       });
-      lastVisibleDocument = snapshot.docs[snapshot.docs.length - 1]; // Get the last document for pagination
+      lastVisibleDocument = snapshot.docs[snapshot.docs.length - 1]; 
 
       renderPlaylist(paginatedData);
-      document.getElementById('loading').style.display = "none"; 
+      // document.getElementById('loading').style.display = "none"; // This line is now redundant
       updateLoadMoreButton(snapshot.docs.length);
 
       // Show initial no videos message if originalData is empty
@@ -669,9 +767,14 @@
 
       if(!resumeState && !videoIdFromUrl) handleInitialPlay();
       else if (videoIdFromUrl) handleInitialPlay();
-    }, (error) => {
+
+      // Hide initial loading overlay after all initial data is processed
+      initialLoadingOverlay.classList.add('hidden');
+
+    }).catch((error) => {
       console.error("Error fetching initial paginated documents: ", error);
       handleFetchError(`Lỗi khi tải trang video đầu tiên từ Firestore: ${error.message}`);
+      initialLoadingOverlay.classList.add('hidden'); // Hide on error too
     });
   }
 
@@ -733,7 +836,7 @@
     songListEl.innerHTML = ''; 
     noResultsMessage.style.display = 'none';
     noMoreVideosMessage.style.display = 'none'; 
-    initialNoVideosMessage.style.display = 'none'; // Hide this when rendering list
+    initialNoVideosMessage.style.display = 'none'; 
 
     const dataToRender = isSearchResult ? playlistData.map(r => r.item) : playlistData;
 
@@ -741,6 +844,7 @@
         noResultsMessage.style.display = 'block';
         noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
         loadMoreBtn.style.display = 'none'; 
+        scrollToTopBtn.classList.remove('show'); // Hide scroll to top if no results
         return;
     } else if (!searchInput.value) {
         updateLoadMoreButton(dataToRender.length); 
@@ -916,14 +1020,14 @@
             renderPlaylist(paginatedData); 
             loadMoreBtn.style.display = 'block'; 
             noMoreVideosMessage.style.display = 'none'; 
-            initialNoVideosMessage.style.display = 'none'; // Hide
+            initialNoVideosMessage.style.display = 'none'; 
             return;
         }
         const results = fuse.search(searchTerm);
         renderPlaylist(results, true);
         loadMoreBtn.style.display = 'none'; 
         noMoreVideosMessage.style.display = 'none'; 
-        initialNoVideosMessage.style.display = 'none'; // Hide
+        initialNoVideosMessage.style.display = 'none'; 
     });
 
     clearSearchBtn.addEventListener('click', () => {
@@ -934,7 +1038,7 @@
         renderPlaylist(paginatedData); 
         loadMoreBtn.style.display = 'block'; 
         noMoreVideosMessage.style.display = 'none'; 
-        initialNoVideosMessage.style.display = 'none'; // Hide
+        initialNoVideosMessage.style.display = 'none'; 
     });
     
     document.getElementById('resume-yes').onclick = () => {
@@ -1035,6 +1139,20 @@
     loadMoreBtn.addEventListener('click', () => {
       triggerHapticFeedback(30);
       loadMoreVideos();
+    });
+
+    // Scroll to Top button event listener
+    songListEl.addEventListener('scroll', () => {
+        if (songListEl.scrollTop > 200) { // Show button after scrolling 200px
+            scrollToTopBtn.classList.add('show');
+        } else {
+            scrollToTopBtn.classList.remove('show');
+        }
+    });
+
+    scrollToTopBtn.addEventListener('click', () => {
+        triggerHapticFeedback(30);
+        songListEl.scrollTo({ top: 0, behavior: 'smooth' });
     });
   }
 
@@ -1193,9 +1311,19 @@
   }
 
   function handleFetchError(err) {
-    document.getElementById('loading').style.display = "none";
-    errorDisplay.textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
-    errorDisplay.style.display = 'block';
+    // Ensure errorDisplay is not null before accessing its style property
+    const currentErrorDisplay = document.getElementById('err');
+    const currentInitialLoadingOverlay = document.getElementById('initial-loading-overlay');
+
+    if (currentErrorDisplay) { 
+      currentErrorDisplay.textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
+      currentErrorDisplay.style.display = 'block';
+    } else {
+      console.error("Error display element not found!", err);
+    }
+    if (currentInitialLoadingOverlay) {
+      currentInitialLoadingOverlay.classList.add('hidden'); // Hide overlay on error
+    }
   }
   
   function highlightMatches(text, indices) {
