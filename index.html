@@ -659,7 +659,7 @@
   let noMoreVideosMessage; 
   let initialNoVideosMessage; 
   let initialLoadingOverlay; 
-  let scrollToTopBtn; // New element reference
+  let scrollToTopBtn; 
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
@@ -679,7 +679,7 @@
     noMoreVideosMessage = document.getElementById('no-more-videos-message'); 
     initialNoVideosMessage = document.getElementById('initial-no-videos-message'); 
     initialLoadingOverlay = document.getElementById('initial-loading-overlay'); 
-    scrollToTopBtn = document.getElementById('scroll-to-top-btn'); // Get the new button
+    scrollToTopBtn = document.getElementById('scroll-to-top-btn'); 
 
     setupEventListeners();
     loadTheme();
@@ -761,6 +761,7 @@
         initialNoVideosMessage.style.display = 'block';
         loadMoreBtn.style.display = 'none';
         noMoreVideosMessage.style.display = 'none';
+        noResultsMessage.style.display = 'none'; // Ensure no results message is hidden
       } else {
         initialNoVideosMessage.style.display = 'none';
       }
@@ -840,11 +841,15 @@
 
     const dataToRender = isSearchResult ? playlistData.map(r => r.item) : playlistData;
 
-    if (dataToRender.length === 0 && searchInput.value) {
-        noResultsMessage.style.display = 'block';
-        noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
+    if (dataToRender.length === 0) { 
+        if (searchInput.value) { 
+            noResultsMessage.style.display = 'block';
+            noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
+        } else { 
+            initialNoVideosMessage.style.display = 'block';
+        }
         loadMoreBtn.style.display = 'none'; 
-        scrollToTopBtn.classList.remove('show'); // Hide scroll to top if no results
+        scrollToTopBtn.classList.remove('show'); 
         return;
     } else if (!searchInput.value) {
         updateLoadMoreButton(dataToRender.length); 
@@ -1206,6 +1211,7 @@
   function toggleShuffle() {
     isShuffle = !isShuffle;
     document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
+    localStorage.setItem('isShuffle', isShuffle); // Save shuffle state
     
     if (isShuffle) {
         // When shuffling, we re-shuffle the entire originalData and reset pagination
@@ -1233,6 +1239,7 @@
       repeatBtn.title = repeatMode === 'all' ? 'Lặp lại danh sách' : 'Tắt lặp lại';
     }
     lucide.createIcons();
+    localStorage.setItem('repeatMode', repeatMode); // Save repeat state
   }
     
   function updateVolumeUI() {
@@ -1311,7 +1318,6 @@
   }
 
   function handleFetchError(err) {
-    // Ensure errorDisplay is not null before accessing its style property
     const currentErrorDisplay = document.getElementById('err');
     const currentInitialLoadingOverlay = document.getElementById('initial-loading-overlay');
 
@@ -1322,7 +1328,7 @@
       console.error("Error display element not found!", err);
     }
     if (currentInitialLoadingOverlay) {
-      currentInitialLoadingOverlay.classList.add('hidden'); // Hide overlay on error
+      currentInitialLoadingOverlay.classList.add('hidden'); 
     }
   }
   
