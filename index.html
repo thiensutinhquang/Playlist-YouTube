@@ -7,7 +7,7 @@
   
   <!-- === PWA MANIFEST & THEME === -->
   <meta name="theme-color" content="#c5a043"/>
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGxheSBWaWRlbyBZb3V0dWJlIFRRIiwic2hvcnRfbmFtZSI6IllvdVR1YmUgVFEiLCJzdGFydF91cmwiOiIuLz9zb3VyY2U9cHdhIiwiZGlzcGxheSI6ImJyb3dzZXIiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwidGhlbWVfY29sb3IiOiIjYzVhMDQzIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkZGRkYiLCJkZXNjcmlwdGlvbiI6IlRyw6xuaCBwaMOhdCB2aWRlby9uaOG6oWMgWW91VHViZSBob+G6oXQgxJHhu5VuZyBu4buBbiwgw7NuZyBk4bulbmcgZ+G7kWMuIMSQaeG7gXUga2hp4buDbiB04burIG3DoG4gaMOsbmgha2jDs2EuIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvYzVhMDQzLzhCMDAwMD90ZXh0PVRRJmZvbnQ9aW1wYWN0Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vNTEyeDUxMi9jNWEwNDMvOEIwMDAwP3RleHQ9VFEmdm9udD1pbXBhY3QiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiYmFzZTY0In1dLCJwcmVmZXJfcmVsYXRlZF9hcHBsaWNhdGlvbnMiOmZhbHNlLCJzY29wZSI6Ii8ifQ==">
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGxheSBWaWRlbyBZb3V0dWJlIFRRIiwic2hvcnRfbmFtZSI6IllvdVR1YmUgVFEiLCJzdGFydF91cmwiOiIuLz9zb3VyY2U9cHdhIiwiZGlzcGxheSI6ImJyb3dzZXIiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwidGhlbWVfY29sb3IiOiIjYzVhMDQzIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkZGRkYiLCJkZXNjcmlwdGlvbiI6IlRyw6xuaCBwaMOhdCB2aWRlby9uaOG6oWMgWW91VHViZSBob+G6oXQgxJHhu5VuZyBu4buBbiwgw7NuZyBk4dulbmcgZ+G7kWMuIMSQaeG7gXUga2hp4buDbiB04burIG3DoG4gaMOsbmgha2jDs2EuIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvYzVhMDQzLzhCMDAwMD90ZXh0PVRRJmZvbnQ9aW1wYWN0Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vNTEyeDUxMi9jNWEwNDMvOEIwMDAwP3RleHQ9VFEmdm9udD1pbXBhY3QiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiYmFzZTY0In1dLCJwcmVmZXJfcmVsYXRlZF9hcHBsaWNhdGlvbnMiOmZhbHNlLCJzY29wZSI6Ii8ifQ==">
   <link rel="apple-touch-icon" href="https://placehold.co/180x180/c5a043/8B0000?text=TQ&font=impact">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -128,8 +128,15 @@
     #no-results-message { text-align: center; padding: 40px 20px; color: var(--text-secondary); font-style: italic; }
 
     /* === NÂNG CẤP BỐ CỤC DANH SÁCH BÀI HÁT (2 DÒNG) === */
-    #song-list-container { border-radius: 12px; overflow: hidden; flex-grow: 1; min-height: 0; }
-    #song-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; height: 100%; }
+    #song-list-container { 
+      border-radius: 12px; 
+      overflow: hidden; 
+      flex-grow: 1; 
+      min-height: 0; 
+      display: flex;
+      flex-direction: column; /* Để nút "Tải thêm" nằm dưới danh sách */
+    }
+    #song-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
     #song-list li {
         display: block;
         padding: 10px 12px;
@@ -331,6 +338,34 @@
     .status-indicator .lucide { stroke: var(--accent-color); width: 22px; height: 22px; opacity: 0.7; }
     .search-icon .lucide { width: 18px; height: 18px; }
 
+    /* Style cho nút Tải thêm */
+    #load-more-btn {
+      display: block; /* Mặc định ẩn */
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    #load-more-btn:hover {
+      background-color: #d4a74a; /* Màu tối hơn khi hover */
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    #load-more-btn:active {
+      transform: translateY(0);
+    }
+    #load-more-loading {
+      text-align: center;
+      padding: 10px;
+      display: none; /* Mặc định ẩn */
+    }
+
+
     @media (max-width: 900px) {
       body { padding: 16px; }
       #main-container { padding: 20px; }
@@ -407,6 +442,8 @@
       <div id="song-list-container">
         <div id="loading" class="loader-container"><div class="loader"></div></div>
         <ul id="song-list"></ul>
+        <button id="load-more-btn" style="display: none;">Tải thêm</button>
+        <div id="load-more-loading" style="display: none;">Đang tải...</div>
           <div id="no-results-message" style="display: none;"></div>
       </div>
       <div id="err" class="error" style="display:none;"></div>
@@ -459,11 +496,10 @@
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-  import { getFirestore, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, onSnapshot, query, orderBy, limit, startAfter, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"; 
 
   // --- Cấu hình & Biến trạng thái ---
-  // Sử dụng cấu hình Firebase do người dùng cung cấp
   const firebaseConfig = {
     apiKey: "AIzaSyAF1C9onyyefOYcbPb5KzaOkKVqNZ-JRvA",
     authDomain: "playyoutq.firebaseapp.com",
@@ -474,7 +510,7 @@
     appId: "1:389939893536:web:ad66bbbea0de78f198f345"
   };
   
-  // Biến toàn cục được cung cấp bởi môi trường Canvas (vẫn giữ lại nhưng không sử dụng cho signInWithCustomToken)
+  // Biến toàn cục được cung cấp bởi môi trường Canvas
   const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
   // Khởi tạo Firebase
@@ -482,7 +518,7 @@
   const db = getFirestore(app);
   const auth = getAuth(app);
 
-  let userId = null; // Biến để lưu trữ userId sau khi xác thực
+  let userId = null; 
 
   const silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
   
@@ -493,8 +529,13 @@
   let fuse;
   let resumeTimeout;
 
-  let originalData = [], currentPlaylist = [];
-  let resumeState = null, videoIdFromUrl = null;
+  let originalData = []; // To store all data for search
+  let paginatedData = []; // To store currently displayed paginated data
+  let lastVisibleDocument = null; // For Firestore pagination
+  const PAGE_SIZE = 20; // Number of items to load per page
+
+  let videoIdFromUrl = null;
+  let resumeState = null;
   let isShuffle = false, repeatMode = 'none';
 
   const backgroundAudioEl = document.getElementById('background-audio');
@@ -505,6 +546,8 @@
   const noResultsMessage = document.getElementById('no-results-message');
   const resumeOverlay = document.getElementById('resume-overlay');
   const errorDisplay = document.getElementById('err');
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  const loadMoreLoading = document.getElementById('load-more-loading');
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
@@ -514,13 +557,24 @@
     loadTheme();
     backgroundAudioEl.src = silentAudio;
 
+    // Service Worker registration is removed because it causes errors in this environment.
+    // if ('serviceWorker' in navigator) {
+    //   window.addEventListener('load', () => {
+    //     navigator.serviceWorker.register('./service-worker.js') 
+    //       .then(registration => {
+    //         console.log('Service Worker registered with scope:', registration.scope);
+    //       })
+    //       .catch(error => {
+    //         console.error('Service Worker registration failed:', error);
+    //       });
+    //   });
+    // }
+
     // Xác thực Firebase
-    // Thay đổi logic xác thực để luôn ưu tiên đăng nhập ẩn danh cho ứng dụng công khai
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         userId = user.uid;
         console.log("Firebase authenticated. User ID:", userId);
-        // Display userId in the UI (for multi-user apps)
         const userIdDisplay = document.createElement('span');
         userIdDisplay.id = 'user-id-display';
         userIdDisplay.textContent = `User ID: ${userId}`;
@@ -529,10 +583,11 @@
         userIdDisplay.style.color = 'var(--text-secondary)';
         document.querySelector('.main-header-container').appendChild(userIdDisplay);
 
-        // Sau khi xác thực, tải dữ liệu từ Firestore
-        loadVideosFromFirestore();
+        // Tải toàn bộ dữ liệu một lần cho chức năng tìm kiếm (Fuse.js)
+        // và sau đó tải trang đầu tiên cho hiển thị
+        await fetchAllVideosForSearch();
+        loadInitialVideos(); // Tải trang đầu tiên
       } else {
-        // Luôn cố gắng đăng nhập ẩn danh cho quyền truy cập công khai
         try {
           await signInAnonymously(auth);
         } catch (error) {
@@ -551,29 +606,84 @@
     }
   }
 
-  function loadVideosFromFirestore() {
-    // Đường dẫn collection dựa trên rules người dùng cung cấp
-    // match /videos/{document=**}
-    const videosCollectionRef = collection(db, `videos`); 
-    const q = query(videosCollectionRef);
+  // Fetch all videos for Fuse.js search (only once)
+  async function fetchAllVideosForSearch() {
+    const videosCollectionRef = collection(db, `videos`);
+    const q = query(videosCollectionRef, orderBy('Tên Bài Hát')); 
+    try {
+      const snapshot = await getDocs(q); 
+      originalData = snapshot.docs.map(doc => doc.data());
+      setupFuseSearch();
+    } catch (error) {
+      console.error("Error fetching all documents for search:", error);
+      handleFetchError(`Lỗi khi tải toàn bộ danh sách video cho tìm kiếm: ${error.message}`);
+    }
+  }
+
+  // Load initial paginated videos
+  function loadInitialVideos() {
+    const videosCollectionRef = collection(db, `videos`);
+    const q = query(videosCollectionRef, orderBy('Tên Bài Hát'), limit(PAGE_SIZE));
 
     onSnapshot(q, (snapshot) => {
-      const data = [];
+      paginatedData = []; // Clear previous paginated data
       snapshot.forEach(doc => {
-        data.push(doc.data());
+        paginatedData.push(doc.data());
       });
-      originalData = data.filter(item => item && item["Tên Bài Hát"] && (item["Mã Video"] || item["Link Video"]));
-      setupFuseSearch();
-      renderPlaylist(originalData);
-      document.getElementById('loading').style.display = "none"; // Hide loading after data is fetched
+      lastVisibleDocument = snapshot.docs[snapshot.docs.length - 1]; // Get the last document for pagination
+
+      renderPlaylist(paginatedData);
+      document.getElementById('loading').style.display = "none"; 
+      updateLoadMoreButton(snapshot.docs.length);
 
       if(!resumeState && !videoIdFromUrl) handleInitialPlay();
       else if (videoIdFromUrl) handleInitialPlay();
     }, (error) => {
-      console.error("Error fetching documents: ", error);
-      handleFetchError(`Lỗi khi tải danh sách video từ Firestore: ${error.message}`);
+      console.error("Error fetching initial paginated documents: ", error);
+      handleFetchError(`Lỗi khi tải trang video đầu tiên từ Firestore: ${error.message}`);
     });
   }
+
+  // Load more videos
+  async function loadMoreVideos() {
+    if (!lastVisibleDocument) {
+      loadMoreBtn.style.display = 'none'; // No more documents to load
+      return;
+    }
+
+    loadMoreBtn.style.display = 'none';
+    loadMoreLoading.style.display = 'block';
+
+    const videosCollectionRef = collection(db, `videos`);
+    const q = query(videosCollectionRef, orderBy('Tên Bài Hát'), startAfter(lastVisibleDocument), limit(PAGE_SIZE));
+
+    try {
+      const snapshot = await getDocs(q); // Use getDocs for one-time fetch of next page
+      const newDocs = snapshot.docs.map(doc => doc.data());
+      paginatedData = [...paginatedData, ...newDocs]; // Append new data
+
+      lastVisibleDocument = snapshot.docs[snapshot.docs.length - 1]; // Update last visible document
+      
+      renderPlaylist(paginatedData); // Re-render with appended data
+      updateLoadMoreButton(newDocs.length);
+
+    } catch (error) {
+      console.error("Error fetching more documents:", error);
+      handleFetchError(`Lỗi khi tải thêm video từ Firestore: ${error.message}`);
+    } finally {
+      loadMoreLoading.style.display = 'none';
+    }
+  }
+
+  function updateLoadMoreButton(loadedCount) {
+    // If the number of loaded documents is less than PAGE_SIZE, it means there are no more documents
+    if (loadedCount < PAGE_SIZE) {
+      loadMoreBtn.style.display = 'none';
+    } else {
+      loadMoreBtn.style.display = 'block';
+    }
+  }
+
 
   function setupFuseSearch() {
     const fuseOptions = {
@@ -587,18 +697,23 @@
   }
 
   function renderPlaylist(playlistData, isSearchResult = false) {
-    songListEl.innerHTML = '';
+    songListEl.innerHTML = ''; // Clear existing list for initial render or search results
     noResultsMessage.style.display = 'none';
     
-    currentPlaylist = isSearchResult ? playlistData.map(r => r.item) : playlistData;
+    // Determine which data source to use for rendering
+    const dataToRender = isSearchResult ? playlistData.map(r => r.item) : playlistData;
 
-    if (currentPlaylist.length === 0 && searchInput.value) {
+    if (dataToRender.length === 0 && searchInput.value) {
         noResultsMessage.style.display = 'block';
         noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
+        loadMoreBtn.style.display = 'none'; // Hide load more if no search results
         return;
+    } else if (!searchInput.value) {
+        // If not searching, and we're rendering paginated data, show/hide load more button
+        updateLoadMoreButton(dataToRender.length); 
     }
 
-    currentPlaylist.forEach((item, index) => {
+    dataToRender.forEach((item, index) => {
         if (!item) return;
 
         const title = item["Tên Bài Hát"]?.trim();
@@ -633,6 +748,7 @@
       const itemToResume = findItemByVideoId(resumeState.videoId);
       if (itemToResume) { playVideo(itemToResume.videoId, itemToResume.title, resumeState.time); return; }
     }
+    // Only play the first song if no video from URL or resume state, AND we have data
     if (!youtubePlayer && originalData.length > 0) {
         const firstSong = originalData[0];
         const title = firstSong["Tên Bài Hát"].trim();
@@ -764,11 +880,13 @@
         const searchTerm = e.target.value;
         clearSearchBtn.style.display = searchTerm ? 'block' : 'none';
         if (!searchTerm) {
-            renderPlaylist(originalData);
+            renderPlaylist(paginatedData); // Render current paginated data
+            loadMoreBtn.style.display = 'block'; // Show load more button
             return;
         }
         const results = fuse.search(searchTerm);
         renderPlaylist(results, true);
+        loadMoreBtn.style.display = 'none'; // Hide load more button when searching
     });
 
     clearSearchBtn.addEventListener('click', () => {
@@ -776,7 +894,8 @@
         searchInput.value = '';
         searchInput.focus();
         clearSearchBtn.style.display = 'none';
-        renderPlaylist(originalData);
+        renderPlaylist(paginatedData); // Render current paginated data
+        loadMoreBtn.style.display = 'block'; // Show load more button
     });
     
     document.getElementById('resume-yes').onclick = () => {
@@ -872,6 +991,12 @@
             applyTheme(btn.dataset.theme);
         });
     });
+
+    // Load More button event listener
+    loadMoreBtn.addEventListener('click', () => {
+      triggerHapticFeedback(30);
+      loadMoreVideos();
+    });
   }
 
   function showResumeDialog() {
@@ -933,7 +1058,7 @@
         listToRender = results;
         isSearchResult = true;
     } else {
-        listToRender = [...originalData];
+        listToRender = [...originalData]; // Shuffle applies to all data for now
     }
     
     if (isShuffle) {
@@ -1082,7 +1207,7 @@
         triggerHapticFeedback(30);
         // Dynamically get the current URL for sharing
         const currentAppUrl = window.location.origin + window.location.pathname;
-        const currentTime = (youtubePlayer && youtubePlayer.getVideoData().video_id === videoId) ? youtubePlayer.getCurrentTime() : 0; // Fixed: currentTime was undefined
+        const currentTime = (youtubePlayer && youtubePlayer.getVideoData().video_id === videoId) ? youtubePlayer.getCurrentTime() : 0; 
         const shareUrl = `${currentAppUrl}?v=${videoId}&t=${Math.floor(currentTime)}`;
         copyToClipboard(shareUrl);
       };
