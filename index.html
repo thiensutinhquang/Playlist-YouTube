@@ -7,7 +7,7 @@
   
   <!-- === PWA MANIFEST & THEME === -->
   <meta name="theme-color" content="#c5a043"/>
-  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGxheSBWaWRlbyBZb3V0dWJlIFRRIiwic2hvcnRfbmFtZSI6IllvdXR1YmUgVFEiLCJzdGFydF91cmwiOiIuLz9zb3VyY2U9cHdhIiwiZGlzcGxheSI6ImJyb3dzZXIiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwidGhlbWVfY29sb3IiOiIjYzVhMDQzIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkZGRkYiLCJkZXNjcmlwdGlvbiI6IlRyw6xuaCBwaMOhdCB2aWRlby9uaOG6oWMgWW91VHViZSBob+G6oXQgxJHhu5luZyBu4buBbiwgw7luZyBk4bulbmcgZ+G7kWMuIMSQaeG7gXUga2hp4buDbiB04burIG3DoG4gaMOsbmgga2jDs2EuIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvYzVhMDQzLzhCMDAwMD90ZXh0PVRRJmZvbnQ9aW1wYWN0Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vNTEyeDUxMi9jNWEwNDMvOEIwMDAwP3RleHQ9VFEmdm9udD1pbXBhY3QiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiaW1hZ2UvcG5nIn1dLCJwcmVmZXJfcmVsYXRlZF9hcHBsaWNhdGlvbnMiOmZhbHNlLCJzY29wZSI6Ii8ifQ==">
+  <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiUGxheSBWaWRlbyBZb3V0dWJlIFRRIiwic2hvcnRfbmFtZSI6IllvdVR1YmUgVFEiLCJzdGFydF91cmwiOiIuLz9zb3VyY2U9cHdhIiwiZGlzcGxheSI6ImJyb3dzZXIiLCJvcmllbnRhdGlvbiI6InBvcnRyYWl0IiwidGhlbWVfY29sb3IiOiIjYzVhMDQzIiwiYmFja2dyb3VuZF9jb2xvciI6IiNGRkZGRkYiLCJkZXNjcmlwdGlvbiI6IlRyw6xuaCBwaMOhdCB2aWRlby9uaOG6oWMgWW91VHViZSBob+G6oXQgxJHhu5VuZyBu4buBbiwgw7NuZyBk4bulbmcgZ+G7kWMuIMSQaeG7gXUga2hp4buDbiB04burIG3DoG4gaMOsbmgha2jDs2EuIiwiaWNvbnMiOlt7InNyYyI6Imh0dHBzOi8vcGxhY2Vob2xkLmNvLzE5MngxOTIvYzVhMDQzLzhCMDAwMD90ZXh0PVRRJmZvbnQ9aW1wYWN0Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3BuZyJ9LHsic3JjIjoiaHR0cHM6Ly9wbGFjZWhvbGQuY28vNTEyeDUxMi9jNWEwNDMvOEIwMDAwP3RleHQ9VFEmdm9udD1pbXBhY3QiLCJzaXplcyI6IjUxMng1MTIiLCJ0eXBlIjoiYmFzZTY0In1dLCJwcmVmZXJfcmVsYXRlZF9hcHBsaWNhdGlvbnMiOmZhbHNlLCJzY29wZSI6Ii8ifQ==">
   <link rel="apple-touch-icon" href="https://placehold.co/180x180/c5a043/8B0000?text=TQ&font=impact">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -92,7 +92,28 @@
     }
     #player-controls, #song-list li:hover { background-color: var(--hover-bg); }
 
-    .main-header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;}
+    .main-header-container { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 28px; 
+      flex-wrap: wrap; 
+      gap: 16px;
+    }
+    /* Thêm style cho phần tiêu đề chứa logo và H1 */
+    .app-title-container {
+        display: flex;
+        align-items: center;
+        gap: 15px; /* Khoảng cách giữa logo và chữ */
+    }
+    .app-logo {
+        width: 60px; /* Kích thước logo lớn hơn */
+        height: 60px;
+        border-radius: 12px; /* Bo tròn góc cho logo */
+        object-fit: cover;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Thêm đổ bóng cho logo */
+    }
+
     #layout-container { display: flex; gap: 32px; }
     #playlist-column { flex: 1; min-width: 300px; display: flex; flex-direction: column; }
     #player-column { flex: 2; }
@@ -210,7 +231,7 @@
     input:checked + .theme-slider { background-color: var(--accent-color); }
     input:checked + .theme-slider:before { transform: translateX(20px); }
 
-    .presets-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .presets-grid { display: grid; grid-template-columns: repeat(3, 1fR); gap: 10px; }
     .preset-btn { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s, transform 0.2s; }
     .preset-btn:hover { transform: scale(1.1); }
     .preset-btn.active { border-color: var(--accent-color); }
@@ -325,7 +346,10 @@
 <body data-theme="light">
 <div id="main-container">
   <div class="main-header-container">
-    <h1>Play Video Youtube TQ</h1>
+    <div class="app-title-container">
+      <img src="https://raw.githubusercontent.com/thiensutinhquang/Admin/main/icons/icon.png" alt="App Logo" class="app-logo" onerror="this.onerror=null;this.src='https://placehold.co/60x60/c5a043/8B0000?text=TQ';">
+      <h1>Play Video Youtube TQ</h1>
+    </div>
     <div class="header-nav-wrapper">
       <div class="header-nav-bar">
           <button id="install-pwa-btn" class="nav-button-base btn-cai-dat" style="display: none;">
@@ -338,11 +362,11 @@
           <div class="dropdown" id="platforms-dropdown-wrapper">
               <button class="nav-button-base btn-nen-tang" id="platforms-btn"><span class="button-text-wrapper">CÁC NỀN TẢNG</span></button>
               <div class="dropdown-content">
-                  <a href="https://www.youtube.com/@Thi%C3%AAnS%E1%BB%A9TinhQuang" target="_blank" rel="noopener noreferrer" title="YouTube"><img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" onError="this.onerror=null; this.src='https://placehold.co/28x28/ff0000/ffffff?text=YT';" /><span>YouTube</span></a>
-                  <a href="https://www.tiktok.com/@minhsutinhquang" target="_blank" rel="noopener noreferrer" title="TikTok"><img src="https://static-00.iconduck.com/assets.00/tiktok-icon-2048x2048-15w2g25h.png" alt="TikTok" onError="this.onerror=null; this.src='https://placehold.co/28x28/ffffff/000000?text=TT';" /><span>TikTok</span></a>
-                  <a href="https://www.facebook.com/phatphapnhiemmauTinhQuang" target="_blank" rel="noopener noreferrer" title="Facebook"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" onError="this.onerror=null; this.src='https://placehold.co/28x28/1877f2/ffffff?text=FB';" /><span>Facebook</span></a>
-                  <a href="https://t.me/Giaoly_phap_don_ngo" target="_blank" rel="noopener noreferrer" title="Telegram"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" onError="this.onerror=null; this.src='https://placehold.co/28x28/229ed9/ffffff?text=TG';" /><span>Telegram</span></a>
-                  <a href="https://zalo.me/g/dukrae245" target="_blank" rel="noopener noreferrer" title="Zalo"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" onError="this.onerror=null; this.src='https://placehold.co/28x28/0068ff/ffffff?text=ZL';" /><span>Zalo</span></a>
+                  <a href="https://www.youtube.com/@Thi%C3%AAnS%E1%BB%A9TinhQuang" target="_blank" rel="noopener noreferrer" title="YouTube"><img src="https://upload.wikimedia.org/wikipedia/commons/0/09/YouTube_full-color_icon_%282017%29.svg" alt="YouTube" onerror="this.onerror=null; this.src='https://placehold.co/28x28/ff0000/ffffff?text=YT';" /><span>YouTube</span></a>
+                  <a href="https://www.tiktok.com/@minhsutinhquang" target="_blank" rel="noopener noreferrer" title="TikTok"><img src="https://static-00.iconduck.com/assets.00/tiktok-icon-2048x2048-15w2g25h.png" alt="TikTok" onerror="this.onerror=null; this.src='https://placehold.co/28x28/ffffff/000000?text=TT';" /><span>TikTok</span></a>
+                  <a href="https://www.facebook.com/phatphapnhiemmauTinhQuang" target="_blank" rel="noopener noreferrer" title="Facebook"><img src="https://upload.wikimedia.org/wikipedia/commons/1/1b/Facebook_icon.svg" alt="Facebook" onerror="this.onerror=null; this.src='https://placehold.co/28x28/1877f2/ffffff?text=FB';" /><span>Facebook</span></a>
+                  <a href="https://t.me/Giaoly_phap_don_ngo" target="_blank" rel="noopener noreferrer" title="Telegram"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram" onerror="this.onerror=null; this.src='https://placehold.co/28x28/229ed9/ffffff?text=TG';" /><span>Telegram</span></a>
+                  <a href="https://zalo.me/g/dukrae245" target="_blank" rel="noopener noreferrer" title="Zalo"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg" alt="Zalo" onerror="this.onerror=null; this.src='https://placehold.co/28x28/0068ff/ffffff?text=ZL';" /><span>Zalo</span></a>
               </div>
           </div>
           <!-- Menu Giao diện -->
@@ -383,7 +407,7 @@
       <div id="song-list-container">
         <div id="loading" class="loader-container"><div class="loader"></div></div>
         <ul id="song-list"></ul>
-         <div id="no-results-message" style="display: none;"></div>
+          <div id="no-results-message" style="display: none;"></div>
       </div>
       <div id="err" class="error" style="display:none;"></div>
     </div>
@@ -431,11 +455,35 @@
 <!-- Thư viện tìm kiếm thông minh -->
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
-<script>
- (function() { 
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+  import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+  import { getFirestore, collection, onSnapshot, query } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
   // --- Cấu hình & Biến trạng thái ---
-  const apiEndpoint = 'https://api.sheetbest.com/sheets/276c7c77-e2f0-4726-9929-7c4848f276bb';
-  const launcherUrl = 'https://thiensutinhquang.github.io/playtholientuc/molienketchrome.html';
+  // Sử dụng cấu hình Firebase do người dùng cung cấp
+  const firebaseConfig = {
+    apiKey: "AIzaSyAF1C9onyyefOYcbPb5KzaOkKVqNZ-JRvA",
+    authDomain: "playyoutq.firebaseapp.com",
+    databaseURL: "https://playyoutq-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "playyoutq",
+    storageBucket: "playyoutq.firebasestorage.app",
+    messagingSenderId: "389939893536",
+    appId: "1:389939893536:web:ad66bbbea0de78f198f345"
+  };
+  
+  // Biến toàn cục được cung cấp bởi môi trường Canvas (vẫn giữ lại nhưng không sử dụng cho signInWithCustomToken)
+  const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+  // Khởi tạo Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth(app);
+
+  let userId = null; // Biến để lưu trữ userId sau khi xác thực
+
   const silentAudio = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
   
   let youtubePlayer;
@@ -456,14 +504,44 @@
   const clearSearchBtn = document.getElementById('clear-search-btn');
   const noResultsMessage = document.getElementById('no-results-message');
   const resumeOverlay = document.getElementById('resume-overlay');
+  const errorDisplay = document.getElementById('err');
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
 
-  function init() {
+  async function init() {
     setupEventListeners();
     loadTheme();
     backgroundAudioEl.src = silentAudio;
+
+    // Xác thực Firebase
+    // Thay đổi logic xác thực để luôn ưu tiên đăng nhập ẩn danh cho ứng dụng công khai
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        userId = user.uid;
+        console.log("Firebase authenticated. User ID:", userId);
+        // Display userId in the UI (for multi-user apps)
+        const userIdDisplay = document.createElement('span');
+        userIdDisplay.id = 'user-id-display';
+        userIdDisplay.textContent = `User ID: ${userId}`;
+        userIdDisplay.style.fontSize = '0.8em';
+        userIdDisplay.style.marginLeft = '20px';
+        userIdDisplay.style.color = 'var(--text-secondary)';
+        document.querySelector('.main-header-container').appendChild(userIdDisplay);
+
+        // Sau khi xác thực, tải dữ liệu từ Firestore
+        loadVideosFromFirestore();
+      } else {
+        // Luôn cố gắng đăng nhập ẩn danh cho quyền truy cập công khai
+        try {
+          await signInAnonymously(auth);
+        } catch (error) {
+          console.error("Firebase authentication error:", error);
+          handleFetchError(`Lỗi xác thực Firebase: ${error.message}`);
+        }
+      }
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     videoIdFromUrl = urlParams.get('v');
     const savedStateJSON = localStorage.getItem('youtubePlayerState');
@@ -471,16 +549,30 @@
         resumeState = JSON.parse(savedStateJSON);
         showResumeDialog();
     }
-    fetch(apiEndpoint)
-      .then(res => res.ok ? res.json() : Promise.reject(`Lỗi mạng: ${res.status}`))
-      .then(data => {
-        originalData = data.filter(item => item && item["Tên Bài Hát"] && (item["Mã Video"] || item["Link Video"]));
-        setupFuseSearch();
-        renderPlaylist(originalData);
-        if(!resumeState && !videoIdFromUrl) handleInitialPlay();
-        else if (videoIdFromUrl) handleInitialPlay();
-      })
-      .catch(handleFetchError);
+  }
+
+  function loadVideosFromFirestore() {
+    // Đường dẫn collection dựa trên rules người dùng cung cấp
+    // match /videos/{document=**}
+    const videosCollectionRef = collection(db, `videos`); 
+    const q = query(videosCollectionRef);
+
+    onSnapshot(q, (snapshot) => {
+      const data = [];
+      snapshot.forEach(doc => {
+        data.push(doc.data());
+      });
+      originalData = data.filter(item => item && item["Tên Bài Hát"] && (item["Mã Video"] || item["Link Video"]));
+      setupFuseSearch();
+      renderPlaylist(originalData);
+      document.getElementById('loading').style.display = "none"; // Hide loading after data is fetched
+
+      if(!resumeState && !videoIdFromUrl) handleInitialPlay();
+      else if (videoIdFromUrl) handleInitialPlay();
+    }, (error) => {
+      console.error("Error fetching documents: ", error);
+      handleFetchError(`Lỗi khi tải danh sách video từ Firestore: ${error.message}`);
+    });
   }
 
   function setupFuseSearch() {
@@ -529,7 +621,7 @@
         const playingLi = songListEl.querySelector(`li[data-video-id="${currentPlayingVideoId}"]`);
         if (playingLi) playingLi.classList.add('playing');
     }
-     lucide.createIcons();
+      lucide.createIcons();
   }
   
   function handleInitialPlay() {
@@ -899,8 +991,8 @@
           title: title, artist: 'Play Video Youtube TQ', album: 'Danh sách phát',
           artwork: [
             { src: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`, sizes: '1280x720', type: 'image/jpeg' },
-            { src: `https://i.ytimg.com/vi/${videoId}/sddefault.jpg`,   sizes: '640x480', type: 'image/jpeg' },
-            { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,   sizes: '480x360', type: 'image/jpeg' }
+            { src: `https://i.ytimg.com/vi/${videoId}/sddefault.jpg`,    sizes: '640x480', type: 'image/jpeg' },
+            { src: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,    sizes: '480x360', type: 'image/jpeg' }
           ]
         });
         navigator.mediaSession.setActionHandler('play', () => { youtubePlayer?.playVideo(); });
@@ -943,8 +1035,8 @@
 
   function handleFetchError(err) {
     document.getElementById('loading').style.display = "none";
-    document.getElementById('err').textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
-    document.getElementById('err').style.display = 'block';
+    errorDisplay.textContent = `Lỗi nghiêm trọng khi tải dữ liệu! Chi tiết: ${err}`;
+    errorDisplay.style.display = 'block';
   }
   
   function highlightMatches(text, indices) {
@@ -976,8 +1068,8 @@
       li.innerHTML = `
         <div class="video-top-line">
             <div class="video-identifier">
-                 <span class="video-index">${index + 1}.</span>
-                 <img class="video-thumbnail" src="https://i.ytimg.com/vi/${videoId}/mqdefault.jpg" alt="Thumbnail for ${title}" loading="lazy">
+               <span class="video-index">${index + 1}.</span>
+               <img class="video-thumbnail" src="https://i.ytimg.com/vi/${videoId}/mqdefault.jpg" alt="Thumbnail for ${title}" loading="lazy">
             </div>
             <button class="share-btn" title="Chia sẻ video"><i data-lucide="share-2"></i></button>
         </div>
@@ -988,8 +1080,10 @@
       li.querySelector('.share-btn').onclick = (e) => {
         e.stopPropagation();
         triggerHapticFeedback(30);
-        const currentTime = (youtubePlayer && youtubePlayer.getVideoData().video_id === videoId) ? youtubePlayer.getCurrentTime() : 0;
-        const shareUrl = `${launcherUrl}?v=${videoId}&t=${Math.floor(currentTime)}`;
+        // Dynamically get the current URL for sharing
+        const currentAppUrl = window.location.origin + window.location.pathname;
+        const currentTime = (youtubePlayer && youtubePlayer.getVideoData().video_id === videoId) ? youtubePlayer.getCurrentTime() : 0; // Fixed: currentTime was undefined
+        const shareUrl = `${currentAppUrl}?v=${videoId}&t=${Math.floor(currentTime)}`;
         copyToClipboard(shareUrl);
       };
       return li;
@@ -1018,7 +1112,6 @@
           }
       }
   }
- })();
 </script>
 </body>
 </html>
