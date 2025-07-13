@@ -362,6 +362,37 @@
     #load-more-loading {
       text-align: center;
       padding: 10px;
+      display: flex; /* Changed to flex to center spinner */
+      justify-content: center;
+      align-items: center;
+      gap: 10px; /* Space between text and spinner */
+      color: var(--text-secondary);
+    }
+    /* Spinner CSS */
+    .spinner {
+      border: 4px solid var(--border-color);
+      border-top: 4px solid var(--accent-color);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #no-more-videos-message {
+      text-align: center;
+      padding: 20px;
+      color: var(--text-secondary);
+      font-style: italic;
+      display: none; /* Mặc định ẩn */
+    }
+    #initial-no-videos-message {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+      font-style: italic;
       display: none; /* Mặc định ẩn */
     }
 
@@ -443,8 +474,12 @@
         <div id="loading" class="loader-container"><div class="loader"></div></div>
         <ul id="song-list"></ul>
         <button id="load-more-btn" style="display: none;">Tải thêm</button>
-        <div id="load-more-loading" style="display: none;">Đang tải...</div>
-          <div id="no-results-message" style="display: none;"></div>
+        <div id="load-more-loading" style="display: none;">
+          <div class="spinner"></div> <span>Đang tải...</span>
+        </div>
+        <div id="no-more-videos-message" style="display: none;">Đã tải hết tất cả video.</div>
+        <div id="no-results-message" style="display: none;"></div>
+        <div id="initial-no-videos-message" style="display: none;">Không có video nào trong danh sách.</div>
       </div>
       <div id="err" class="error" style="display:none;"></div>
     </div>
@@ -548,6 +583,8 @@
   const errorDisplay = document.getElementById('err');
   const loadMoreBtn = document.getElementById('load-more-btn');
   const loadMoreLoading = document.getElementById('load-more-loading');
+  const noMoreVideosMessage = document.getElementById('no-more-videos-message'); 
+  const initialNoVideosMessage = document.getElementById('initial-no-videos-message'); // New element reference
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
@@ -556,19 +593,6 @@
     setupEventListeners();
     loadTheme();
     backgroundAudioEl.src = silentAudio;
-
-    // Service Worker registration is removed because it causes errors in this environment.
-    // if ('serviceWorker' in navigator) {
-    //   window.addEventListener('load', () => {
-    //     navigator.serviceWorker.register('./service-worker.js') 
-    //       .then(registration => {
-    //         console.log('Service Worker registered with scope:', registration.scope);
-    //       })
-    //       .catch(error => {
-    //         console.error('Service Worker registration failed:', error);
-    //       });
-    //   });
-    // }
 
     // Xác thực Firebase
     onAuthStateChanged(auth, async (user) => {
@@ -583,10 +607,8 @@
         userIdDisplay.style.color = 'var(--text-secondary)';
         document.querySelector('.main-header-container').appendChild(userIdDisplay);
 
-        // Tải toàn bộ dữ liệu một lần cho chức năng tìm kiếm (Fuse.js)
-        // và sau đó tải trang đầu tiên cho hiển thị
         await fetchAllVideosForSearch();
-        loadInitialVideos(); // Tải trang đầu tiên
+        loadInitialVideos(); 
       } else {
         try {
           await signInAnonymously(auth);
@@ -636,6 +658,15 @@
       document.getElementById('loading').style.display = "none"; 
       updateLoadMoreButton(snapshot.docs.length);
 
+      // Show initial no videos message if originalData is empty
+      if (originalData.length === 0) {
+        initialNoVideosMessage.style.display = 'block';
+        loadMoreBtn.style.display = 'none';
+        noMoreVideosMessage.style.display = 'none';
+      } else {
+        initialNoVideosMessage.style.display = 'none';
+      }
+
       if(!resumeState && !videoIdFromUrl) handleInitialPlay();
       else if (videoIdFromUrl) handleInitialPlay();
     }, (error) => {
@@ -647,24 +678,25 @@
   // Load more videos
   async function loadMoreVideos() {
     if (!lastVisibleDocument) {
-      loadMoreBtn.style.display = 'none'; // No more documents to load
+      loadMoreBtn.style.display = 'none'; 
+      noMoreVideosMessage.style.display = 'block'; 
       return;
     }
 
     loadMoreBtn.style.display = 'none';
-    loadMoreLoading.style.display = 'block';
+    loadMoreLoading.style.display = 'flex'; 
 
     const videosCollectionRef = collection(db, `videos`);
     const q = query(videosCollectionRef, orderBy('Tên Bài Hát'), startAfter(lastVisibleDocument), limit(PAGE_SIZE));
 
     try {
-      const snapshot = await getDocs(q); // Use getDocs for one-time fetch of next page
+      const snapshot = await getDocs(q); 
       const newDocs = snapshot.docs.map(doc => doc.data());
-      paginatedData = [...paginatedData, ...newDocs]; // Append new data
+      paginatedData = [...paginatedData, ...newDocs]; 
 
-      lastVisibleDocument = snapshot.docs[snapshot.docs.length - 1]; // Update last visible document
+      lastVisibleDocument = snapshot.docs[snapshot.docs.length - 1]; 
       
-      renderPlaylist(paginatedData); // Re-render with appended data
+      renderPlaylist(paginatedData); 
       updateLoadMoreButton(newDocs.length);
 
     } catch (error) {
@@ -676,11 +708,12 @@
   }
 
   function updateLoadMoreButton(loadedCount) {
-    // If the number of loaded documents is less than PAGE_SIZE, it means there are no more documents
     if (loadedCount < PAGE_SIZE) {
       loadMoreBtn.style.display = 'none';
+      noMoreVideosMessage.style.display = 'block'; 
     } else {
       loadMoreBtn.style.display = 'block';
+      noMoreVideosMessage.style.display = 'none'; 
     }
   }
 
@@ -697,19 +730,19 @@
   }
 
   function renderPlaylist(playlistData, isSearchResult = false) {
-    songListEl.innerHTML = ''; // Clear existing list for initial render or search results
+    songListEl.innerHTML = ''; 
     noResultsMessage.style.display = 'none';
-    
-    // Determine which data source to use for rendering
+    noMoreVideosMessage.style.display = 'none'; 
+    initialNoVideosMessage.style.display = 'none'; // Hide this when rendering list
+
     const dataToRender = isSearchResult ? playlistData.map(r => r.item) : playlistData;
 
     if (dataToRender.length === 0 && searchInput.value) {
         noResultsMessage.style.display = 'block';
         noResultsMessage.textContent = `Không tìm thấy kết quả cho "${searchInput.value}"`;
-        loadMoreBtn.style.display = 'none'; // Hide load more if no search results
+        loadMoreBtn.style.display = 'none'; 
         return;
     } else if (!searchInput.value) {
-        // If not searching, and we're rendering paginated data, show/hide load more button
         updateLoadMoreButton(dataToRender.length); 
     }
 
@@ -880,13 +913,17 @@
         const searchTerm = e.target.value;
         clearSearchBtn.style.display = searchTerm ? 'block' : 'none';
         if (!searchTerm) {
-            renderPlaylist(paginatedData); // Render current paginated data
-            loadMoreBtn.style.display = 'block'; // Show load more button
+            renderPlaylist(paginatedData); 
+            loadMoreBtn.style.display = 'block'; 
+            noMoreVideosMessage.style.display = 'none'; 
+            initialNoVideosMessage.style.display = 'none'; // Hide
             return;
         }
         const results = fuse.search(searchTerm);
         renderPlaylist(results, true);
-        loadMoreBtn.style.display = 'none'; // Hide load more button when searching
+        loadMoreBtn.style.display = 'none'; 
+        noMoreVideosMessage.style.display = 'none'; 
+        initialNoVideosMessage.style.display = 'none'; // Hide
     });
 
     clearSearchBtn.addEventListener('click', () => {
@@ -894,8 +931,10 @@
         searchInput.value = '';
         searchInput.focus();
         clearSearchBtn.style.display = 'none';
-        renderPlaylist(paginatedData); // Render current paginated data
-        loadMoreBtn.style.display = 'block'; // Show load more button
+        renderPlaylist(paginatedData); 
+        loadMoreBtn.style.display = 'block'; 
+        noMoreVideosMessage.style.display = 'none'; 
+        initialNoVideosMessage.style.display = 'none'; // Hide
     });
     
     document.getElementById('resume-yes').onclick = () => {
@@ -905,7 +944,7 @@
     };
     document.getElementById('resume-no').onclick = () => {
         triggerHapticFeedback();
-        hideResumeDialog(true); // Dismiss = true
+        hideResumeDialog(true); 
     };
     
     document.querySelector('#player-controls .control-group').addEventListener('click', e => {
@@ -1050,22 +1089,17 @@
     isShuffle = !isShuffle;
     document.getElementById('shuffle-btn').classList.toggle('active', isShuffle);
     
-    let listToRender;
-    let isSearchResult = false;
-
-    if (searchInput.value) {
-        const results = fuse.search(searchInput.value);
-        listToRender = results;
-        isSearchResult = true;
-    } else {
-        listToRender = [...originalData]; // Shuffle applies to all data for now
-    }
-    
     if (isShuffle) {
-        listToRender = shuffleArray(listToRender);
+        // When shuffling, we re-shuffle the entire originalData and reset pagination
+        originalData = shuffleArray(originalData);
+        lastVisibleDocument = null; // Reset pagination
+        loadInitialVideos(); // Load the first page of the shuffled list
+    } else {
+        // If un-shuffling, re-sort originalData by 'Tên Bài Hát' and reset pagination
+        originalData.sort((a, b) => a["Tên Bài Hát"].localeCompare(b["Tên Bài Hát"]));
+        lastVisibleDocument = null; // Reset pagination
+        loadInitialVideos(); // Load the first page of the sorted list
     }
-    
-    renderPlaylist(listToRender, isSearchResult);
   }
   
   function toggleRepeat() {
