@@ -456,15 +456,23 @@
         #copyRawJsonBtn:hover {
             background-color: #3b82f6;
         }
+        /* New spinner for video list */
+        .list-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #4f46e5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: block;
+            margin: 2rem auto;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="user-auth-section text-right mb-4">
-            <span id="userStatus" class="text-gray-700">Đang tải...</span>
-            <button id="signInButton" class="btn text-sm py-1 px-2 ml-2 hidden">Đăng nhập với Google</button>
-            <button id="signOutButton" class="btn text-sm py-1 px-2 ml-2 hidden">Đăng xuất</button>
-        </div>
+        <!-- Thêm một div để hiển thị trạng thái xác thực -->
+        <div id="authStatusMessage" class="text-right text-sm text-gray-600 mb-4">Đang xác thực...</div>
 
         <h1 class="text-3xl font-bold text-gray-800 mb-4">Tải Dữ Liệu Google Sheet lên Firestore</h1>
         <p class="text-gray-600 mb-6">
@@ -500,10 +508,13 @@
 
         <div class="video-list-container">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Danh sách Video từ Firestore</h2>
+            <!-- Thêm phần tử báo cáo tổng số video -->
+            <div id="totalVideosReport" class="text-gray-700 text-sm mb-4">Tổng số video: Đang tải...</div>
             <div class="search-container">
                 <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên hoặc mã video...">
                 <button id="searchButton">Tìm kiếm</button>
                 <button id="clearSearchButton">Xóa tìm kiếm</button>
+                <p class="text-xs text-gray-500 mt-1 w-full text-center">Tìm kiếm hiện chỉ hỗ trợ theo tiền tố của "Tên Bài Hát".</p>
             </div>
             <div class="sort-buttons">
                 <button id="sortTitleAsc" class="sort-btn">Tên Bài Hát (A-Z)</button>
@@ -513,6 +524,7 @@
                 <button id="resetFiltersSortButton" class="sort-btn">Đặt lại</button>
             </div>
             <div id="videoList" class="space-y-3">
+                <div id="listLoadingSpinner" class="list-spinner hidden"></div>
                 <p class="text-gray-500 text-center" id="loadingVideosMessage">Đang tải video...</p>
                 <!-- Video items will be loaded here -->
             </div>
@@ -678,8 +690,9 @@
     <script type="module">
         // Import các hàm cần thiết từ Firebase SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // Chỉ giữ lại các import cần thiết cho xác thực ẩn danh và custom token
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, getDocs, deleteDoc, doc, updateDoc, writeBatch, limit, startAfter, endBefore, orderBy, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Cấu hình Firebase của bạn (được cung cấp bởi người dùng)
         const firebaseConfig = {
@@ -695,7 +708,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
-        const googleProvider = new GoogleAuthProvider();
 
         // Lấy ID ứng dụng Canvas từ biến toàn cục (quan trọng cho đường dẫn Firestore)
         const canvasAppId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -717,6 +729,7 @@
         const uploadedVideosSummary = document.getElementById('uploadedVideosSummary');
         const uploadedVideosList = document.getElementById('uploadedVideosList');
         const failedVideosList = document.getElementById('failedVideosList');
+        const listLoadingSpinner = document.getElementById('listLoadingSpinner'); // New spinner for list loading
 
         // Modal elements
         const confirmationModal = document.getElementById('confirmationModal'); // Google Sheet upload confirmation
@@ -800,14 +813,14 @@
         const nextPageBtn = document.getElementById('nextPageBtn');
         const currentPageInfo = document.getElementById('currentPageInfo');
 
-        // User Auth elements
-        const userStatusSpan = document.getElementById('userStatus');
-        const signInButton = document.getElementById('signInButton');
-        const signOutButton = document.getElementById('signOutButton');
+        // Thêm phần tử để hiển thị trạng thái xác thực
+        const authStatusMessage = document.getElementById('authStatusMessage');
+        // Thêm phần tử báo cáo tổng số video
+        const totalVideosReport = document.getElementById('totalVideosReport');
+
 
         let currentVideoData = []; // To store video data from sheet after fetch
-        let currentFirestoreVideos = []; // To store all video data from Firestore (including doc.id)
-        let filteredAndSortedVideos = []; // Videos after filtering and sorting, before pagination
+        let currentFirestoreVideos = []; // To store all video data from Firestore (including doc.id) - this will now only store the current page's data
         let editingVideoId = null; // ID of the video being edited
         let videoIdToDelete = null; // ID of the video to be deleted
         let dataToImportFromFile = []; // Data parsed from local file, awaiting confirmation
@@ -816,8 +829,14 @@
 
         const PAGE_SIZE = 10; // Number of videos per page
         let currentPage = 1;
+        let lastVisibleDoc = null; // For forward pagination
+        let firstVisibleDoc = null; // For backward pagination
+        let totalVideoCount = 0; // Total count of videos matching current filters/sort
+        let querySnapshotCache = {}; // Cache snapshots for efficient prev/next page navigation
 
         let searchDebounceTimeout; // For search input debouncing
+        let currentSortField = 'Tên Bài Hát'; // Default sort field
+        let currentSortDirection = 'asc'; // Default sort direction
 
         // --- Utility Functions ---
 
@@ -949,10 +968,16 @@
             try {
                 const response = await fetch(googleSheetCsvUrl);
                 if (!response.ok) {
-                    throw new Error(`Lỗi HTTP: ${response.status}`);
+                    throw new Error(`Lỗi HTTP: ${response.status} - Không thể truy cập Google Sheet. Vui lòng kiểm tra URL hoặc quyền truy cập.`);
                 }
                 const csvText = await response.text();
                 const parsedData = parseCsv(csvText);
+                
+                // Validate parsed data for expected columns
+                if (parsedData.length > 0 && (!('title' in parsedData[0]) || !('url' in parsedData[0]))) {
+                    throw new Error("Dữ liệu Google Sheet thiếu các cột 'title' hoặc 'url' bắt buộc. Vui lòng kiểm tra định dạng.");
+                }
+
                 currentVideoData = parsedData; // Store parsed data
                 displayMessage(`Đã tải ${parsedData.length} video từ Google Sheet.`, 'info');
                 return parsedData;
@@ -986,13 +1011,16 @@
                         row[header] = values[index];
                     });
                     data.push(row);
+                } else {
+                    console.warn(`Dòng ${i + 1} trong CSV có số cột không khớp với tiêu đề. Bỏ qua dòng này.`);
+                    // Optionally, you could add this to a failed records list for more detailed feedback
                 }
             }
             return data;
         }
 
         /**
-         * Uploads video data to Cloud Firestore. This function is used by both Google Sheet upload and file import.
+         * Uploads video data to Cloud Firestore using batched writes.
          * @param {Array<Object>} videos - Array of video objects to upload.
          * @param {string} sourceName - Name of the data source (e.g., "Google Sheet", "tệp CSV").
          */
@@ -1002,9 +1030,10 @@
             uploadResultsDiv.classList.add('hidden'); // Hide old upload results
 
             try {
-                // Ensure authenticated
-                await ensureAuthenticated();
+                // Đảm bảo đã xác thực trước khi thực hiện thao tác Firestore
+                await ensureAuthenticated(); // Gọi hàm này khi cần thiết
 
+                const batch = writeBatch(db); // Get a new write batch
                 const videosCollectionRef = collection(db, `videos`);
 
                 let uploadedCount = 0;
@@ -1013,9 +1042,8 @@
 
                 for (let i = 0; i < videos.length; i++) {
                     const video = videos[i];
-                    showUploadLoading(true, `Đang tải lên video ${i + 1} / ${videos.length} từ ${sourceName}...`); // Update progress on button
+                    showUploadLoading(true, `Đang chuẩn bị video ${i + 1} / ${videos.length} từ ${sourceName}...`); // Update progress on button
                     try {
-                        // Basic validation for title and url
                         if (!video.title || video.title.trim() === '') {
                             throw new Error("Dữ liệu thiếu 'Tên Bài Hát' hoặc trống.");
                         }
@@ -1023,18 +1051,22 @@
                             throw new Error("Dữ liệu thiếu 'Mã Video' hoặc không phải URL hợp lệ.");
                         }
 
-                        const docRef = await addDoc(videosCollectionRef, {
+                        const newDocRef = doc(videosCollectionRef); // Create a new document reference with an auto-generated ID
+                        batch.set(newDocRef, {
                             "Tên Bài Hát": video.title.trim(),
                             "Mã Video": video.url.trim(),
                             createdAt: new Date()
                         });
                         uploadedCount++;
-                        successfullyUploaded.push({ id: docRef.id, ...video });
+                        successfullyUploaded.push({ id: newDocRef.id, ...video });
                     } catch (docError) {
-                        console.error(`Lỗi khi thêm tài liệu cho video ID ${video.id || 'N/A'} (${video.title || 'N/A'}):`, docError);
+                        console.error(`Lỗi khi chuẩn bị tài liệu cho video ID ${video.id || 'N/A'} (${video.title || 'N/A'}):`, docError);
                         failedUploads.push({ video: video, error: docError.message });
                     }
                 }
+
+                // Commit the batch
+                await batch.commit();
 
                 // Display detailed results
                 uploadedVideosSummary.textContent = `Tổng cộng: ${videos.length} video từ ${sourceName}. Đã tải lên thành công: ${uploadedCount}. Lỗi: ${failedUploads.length}.`;
@@ -1086,8 +1118,7 @@
             clearMessage();
             showModalButtonLoading(saveNewVideoBtn, saveNewVideoBtnText, saveNewVideoSpinner, true, 'Thêm');
             try {
-                // Ensure authenticated
-                await ensureAuthenticated();
+                await ensureAuthenticated(); // Gọi hàm này khi cần thiết
 
                 const videosCollectionRef = collection(db, `videos`);
                 const docRef = await addDoc(videosCollectionRef, {
@@ -1112,6 +1143,9 @@
          */
         function renderVideoList(videosToRender) {
             videoListDiv.innerHTML = '';
+            listLoadingSpinner.classList.add('hidden'); // Hide spinner when rendering is done
+            loadingVideosMessage.classList.add('hidden'); // Hide loading message
+
             if (videosToRender.length === 0) {
                 videoListDiv.innerHTML = '<p class="text-gray-500 text-center">Chưa có video nào.</p>';
                 return;
@@ -1133,77 +1167,6 @@
                 `;
                 videoListDiv.appendChild(videoItem);
             });
-            loadingVideosMessage.classList.add('hidden');
-        }
-
-        /**
-         * Filters and sorts the full list of videos based on current search term and sort order.
-         * Then renders the current page.
-         */
-        function applyFiltersAndSortAndRenderPage() {
-            let videosToProcess = [...currentFirestoreVideos];
-
-            // Apply search filter
-            const searchTerm = searchInput.value.toLowerCase();
-            if (searchTerm) {
-                videosToProcess = videosToProcess.filter(video =>
-                    String(video['Tên Bài Hát'] || '').toLowerCase().includes(searchTerm) ||
-                    String(video['Mã Video'] || '').toLowerCase().includes(searchTerm)
-                );
-            }
-
-            // Apply sorting (client-side sorting for simplicity with pagination)
-            const currentSortOrder = getSelectedSortOrder();
-            if (currentSortOrder) {
-                videosToProcess.sort((a, b) => {
-                    const fieldA = String(a[currentSortOrder.field] || '').toLowerCase();
-                    const fieldB = String(b[currentSortOrder.field] || '').toLowerCase();
-                    if (currentSortOrder.direction === 'asc') {
-                        return fieldA.localeCompare(fieldB);
-                    } else {
-                        return fieldB.localeCompare(fieldA);
-                    }
-                });
-            }
-
-            filteredAndSortedVideos = videosToProcess; // Store the filtered and sorted list
-            renderCurrentPage(); // Render the current page from this list
-        }
-
-        /**
-         * Renders the videos for the current page from the filteredAndSortedVideos list.
-         */
-        function renderCurrentPage() {
-            const startIndex = (currentPage - 1) * PAGE_SIZE;
-            const endIndex = startIndex + PAGE_SIZE;
-            const videosForPage = filteredAndSortedVideos.slice(startIndex, endIndex);
-
-            renderVideoList(videosForPage);
-            
-            const totalPages = Math.ceil(filteredAndSortedVideos.length / PAGE_SIZE);
-            currentPageInfo.textContent = `Trang ${currentPage} / ${totalPages > 0 ? totalPages : 1}`;
-
-            // Update pagination button states
-            prevPageBtn.disabled = currentPage === 1;
-            nextPageBtn.disabled = currentPage >= totalPages;
-
-            if (filteredAndSortedVideos.length === 0 && searchInput.value !== '') {
-                videoListDiv.innerHTML = '<p class="text-gray-500 text-center">Không tìm thấy video nào phù hợp.</p>';
-            } else if (filteredAndSortedVideos.length === 0) {
-                videoListDiv.innerHTML = '<p class="text-gray-500 text-center">Chưa có video nào.</p>';
-            }
-        }
-
-        /**
-         * Gets the currently selected sort order from the sort buttons.
-         * @returns {Object|null} An object with 'field' and 'direction' or null if no sort is active.
-         */
-        function getSelectedSortOrder() {
-            if (sortTitleAscBtn.classList.contains('active')) return { field: 'Tên Bài Hát', direction: 'asc' };
-            if (sortTitleDescBtn.classList.contains('active')) return { field: 'Tên Bài Hát', direction: 'desc' };
-            if (sortUrlAscBtn.classList.contains('active')) return { field: 'Mã Video', direction: 'asc' };
-            if (sortUrlDescBtn.classList.contains('active')) return { field: 'Mã Video', direction: 'desc' };
-            return null;
         }
 
         /**
@@ -1220,99 +1183,137 @@
         }
 
         /**
-         * Ensures user is authenticated. Tries custom token, then anonymous, then Google Sign-in.
+         * Lắng nghe và hiển thị dữ liệu video từ Firestore với phân trang, tìm kiếm và sắp xếp phía máy chủ.
+         * @param {string} direction - 'next', 'prev', 'initial'
          */
-        async function ensureAuthenticated() {
-            if (auth.currentUser) {
-                return; // Already authenticated
-            }
-            try {
-                if (initialAuthToken) {
-                    await signInWithCustomToken(auth, initialAuthToken);
-                    console.log("Đăng nhập Firebase bằng custom token thành công.");
-                } else {
-                    await signInAnonymously(auth);
-                    console.log("Đăng nhập Firebase ẩn danh thành công.");
-                }
-            } catch (authError) {
-                console.warn("Lỗi xác thực ban đầu, thử đăng nhập Google nếu chưa có:", authError);
-                // If initial auth fails, and user is not yet signed in, prompt for Google Sign-in
-                if (!auth.currentUser) {
-                    try {
-                        await signInWithPopup(auth, googleProvider);
-                        console.log("Đăng nhập Firebase bằng Google thành công.");
-                    } catch (googleAuthError) {
-                        console.error("Lỗi đăng nhập Google:", googleAuthError);
-                        // Handle popup blocked error specifically
-                        if (googleAuthError.code === 'auth/popup-blocked') {
-                            showGlobalToast('Đăng nhập bị chặn: Vui lòng tắt trình chặn cửa sổ bật lên (pop-up blocker) của trình duyệt hoặc cho phép cửa sổ bật lên cho trang này, sau đó thử lại.', 'error');
-                            throw new Error(`Không thể xác thực: Vui lòng tắt trình chặn cửa sổ bật lên.`);
-                        } else {
-                            showGlobalToast(`Lỗi đăng nhập: ${googleAuthError.message}`, 'error');
-                            throw new Error(`Không thể xác thực: ${googleAuthError.message}`);
-                        }
-                    }
-                }
-            }
-        }
-
-        /**
-         * Lắng nghe và hiển thị dữ liệu video từ Firestore.
-         */
-        async function listenForVideos() {
+        async function listenForVideos(direction = 'initial') {
+            listLoadingSpinner.classList.remove('hidden'); // Show spinner
             loadingVideosMessage.classList.remove('hidden'); // Show "Loading videos..."
-            videoListDiv.innerHTML = ''; // Clear old list
+            videoListDiv.innerHTML = ''; // Clear old list content
+            clearMessage(); // Clear any previous messages
 
             try {
-                await ensureAuthenticated(); // Ensure authenticated before listening
+                await ensureAuthenticated(); // Đảm bảo đã xác thực trước khi lắng nghe
 
                 const videosCollectionRef = collection(db, `videos`);
-                // Fetch all documents for client-side pagination and sorting
-                const q = query(videosCollectionRef);
+                let q = query(videosCollectionRef);
 
-                onSnapshot(q, (snapshot) => {
-                    const videos = [];
-                    snapshot.forEach((doc) => {
-                        videos.push({ id: doc.id, ...doc.data() }); // Store doc.id as well
-                    });
-                    currentFirestoreVideos = videos; // Store ALL data from Firestore
-                    currentPage = 1; // Reset to first page on data change
-                    applyFiltersAndSortAndRenderPage(); // Apply filters/sort and render the first page
-                }, (error) => {
-                    console.error("Lỗi khi lắng nghe video từ Firestore:", error);
-                    videoListDiv.innerHTML = `<p class="text-red-500 text-center">Lỗi khi tải danh sách video: ${error.message}</p>`;
+                // Apply search filter if a search term is present
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                if (searchTerm) {
+                    // LƯU Ý QUAN TRỌNG VỀ TÌM KIẾM FIRESTORE:
+                    // Phương pháp `where('field', '>=', searchTerm).where('field', '<=', searchTerm + '\uf8ff')`
+                    // chỉ hiệu quả cho tìm kiếm "bắt đầu bằng" (prefix search).
+                    // Để tìm kiếm "chứa" (contains) bất kỳ đâu trong chuỗi, bạn sẽ cần:
+                    // 1. Một dịch vụ tìm kiếm toàn văn bản bên thứ ba (ví dụ: Algolia, ElasticSearch)
+                    //    tích hợp với Firestore (thông qua Cloud Functions).
+                    // 2. Hoặc một chiến lược lập chỉ mục thủ công phức tạp hơn trong Firestore
+                    //    (ví dụ: tạo một mảng các từ khóa trong mỗi tài liệu và sử dụng `array-contains`,
+                    //    nhưng điều này có giới hạn và không tối ưu cho tìm kiếm toàn văn bản).
+                    // Hiện tại, tìm kiếm này sẽ chỉ trả về các video có 'Tên Bài Hát' bắt đầu bằng `searchTerm`.
+                    q = query(q, where('Tên Bài Hát', '>=', searchTerm), where('Tên Bài Hát', '<=', searchTerm + '\uf8ff'));
+                }
+
+                // Apply sorting
+                // Yêu cầu chỉ mục Firestore: Nếu bạn sắp xếp theo một trường và/hoặc lọc theo một trường khác,
+                // bạn có thể cần tạo một chỉ mục tổng hợp (composite index) trong bảng điều khiển Firebase.
+                // Ví dụ: index cho `Tên Bài Hát` (asc) và `createdAt` (desc).
+                q = query(q, orderBy(currentSortField, currentSortDirection));
+
+                // Handle pagination
+                if (direction === 'next' && lastVisibleDoc) {
+                    q = query(q, startAfter(lastVisibleDoc));
+                } else if (direction === 'prev' && firstVisibleDoc) {
+                    q = query(q, endBefore(firstVisibleDoc));
+                }
+                
+                // Always limit the results to PAGE_SIZE
+                q = query(q, limit(PAGE_SIZE));
+
+                const snapshot = await getDocs(q);
+                const videos = [];
+                snapshot.forEach((doc) => {
+                    videos.push({ id: doc.id, ...doc.data() });
                 });
-            } catch (authError) {
-                console.error("Không thể xác thực để tải video:", authError);
-                loadingVideosMessage.textContent = `Không thể tải danh sách video: ${authError.message}`;
+                currentFirestoreVideos = videos; // Store the current page's data
+
+                if (snapshot.docs.length > 0) {
+                    firstVisibleDoc = snapshot.docs[0];
+                    lastVisibleDoc = snapshot.docs[snapshot.docs.length - 1];
+                } else {
+                    firstVisibleDoc = null;
+                    lastVisibleDoc = null;
+                }
+
+                // To get total count (for pagination info), we need a separate query without limit
+                // This can be expensive for large collections. A better way is to maintain a separate counter.
+                // For now, we'll fetch all to get the count, but be aware of performance implications.
+                // For true scalability, consider a Cloud Function to maintain a count, or a separate collection with counts.
+                const countQuery = query(videosCollectionRef);
+                const countSnapshot = await getDocs(countQuery);
+                totalVideoCount = countSnapshot.size;
+
+                renderVideoList(currentFirestoreVideos);
+                
+                const totalPages = Math.ceil(totalVideoCount / PAGE_SIZE);
+                currentPageInfo.textContent = `Trang ${currentPage} / ${totalPages > 0 ? totalPages : 1} (Tổng: ${totalVideoCount})`;
+                totalVideosReport.textContent = `Tổng số video: ${totalVideoCount}`; // Cập nhật báo cáo tổng số video
+
+                // Update pagination button states based on current page and total count
+                prevPageBtn.disabled = currentPage === 1;
+                nextPageBtn.disabled = currentPage * PAGE_SIZE >= totalVideoCount;
+
+                listLoadingSpinner.classList.add('hidden'); // Hide spinner when rendering is done
+                loadingVideosMessage.classList.add('hidden'); // Hide loading message
+
+                if (videos.length === 0 && searchTerm !== '') {
+                    videoListDiv.innerHTML = '<p class="text-gray-500 text-center">Không tìm thấy video nào phù hợp với tìm kiếm của bạn.</p>';
+                } else if (videos.length === 0) {
+                    videoListDiv.innerHTML = '<p class="text-gray-500 text-center">Chưa có video nào.</p>';
+                }
+
+            } catch (error) {
+                console.error("Lỗi khi lắng nghe video từ Firestore:", error);
+                let errorMessage = `Lỗi khi tải danh sách video: ${error.message}`;
+                if (error.code === 'failed-precondition') {
+                    errorMessage += ` Vui lòng kiểm tra các chỉ mục (indexes) Firestore của bạn. Bạn có thể cần tạo một chỉ mục tổng hợp cho các trường 'Tên Bài Hát' hoặc 'Mã Video' kết hợp với thứ tự sắp xếp.`;
+                }
+                videoListDiv.innerHTML = `<p class="text-red-500 text-center">${errorMessage}</p>`;
+                listLoadingSpinner.classList.add('hidden'); // Hide spinner on error
+                loadingVideosMessage.classList.add('hidden'); // Hide loading message on error
+                totalVideosReport.textContent = `Tổng số video: Lỗi tải`; // Cập nhật báo cáo lỗi
             }
         }
 
         /**
-         * Deletes all documents in the 'videos' collection.
+         * Deletes all documents in the 'videos' collection using batched writes.
          */
         async function deleteAllVideos() {
             displayMessage('Đang xóa tất cả video...', 'info');
             try {
-                await ensureAuthenticated();
+                await ensureAuthenticated(); // Gọi hàm này khi cần thiết
 
                 const videosCollectionRef = collection(db, `videos`);
-                const querySnapshot = await getDocs(query(videosCollectionRef)); // Get all documents
+                const querySnapshot = await getDocs(query(videosCollectionRef)); // Get all documents to delete
 
-                let deletedCount = 0;
-                for (const docSnapshot of querySnapshot.docs) {
-                    try {
-                        await deleteDoc(doc(db, `videos`, docSnapshot.id));
-                        deletedCount++;
-                    } catch (deleteError) {
-                        console.error(`Lỗi khi xóa tài liệu ${docSnapshot.id}:`, deleteError);
-                        displayMessage(`Lỗi khi xóa một số video. Kiểm tra console.`, 'error');
-                    }
+                if (querySnapshot.empty) {
+                    displayMessage('Không có video nào để xóa.', 'info');
+                    return;
                 }
+
+                const batch = writeBatch(db); // Get a new write batch
+                let deletedCount = 0;
+
+                for (const docSnapshot of querySnapshot.docs) {
+                    batch.delete(doc(db, `videos`, docSnapshot.id));
+                    deletedCount++;
+                }
+                
+                await batch.commit(); // Commit the batch
                 displayMessage(`Đã xóa thành công ${deletedCount} video khỏi Firestore.`, 'success');
             } catch (error) {
                 console.error("Lỗi khi xóa tất cả video:", error);
-                displayMessage(`Lỗi khi xóa tất cả video: ${error.message}`, 'error');
+                displayMessage(`Lỗi khi xóa tất cả video: ${error.message}. Vui lòng kiểm tra quyền truy cập Firestore.`, 'error');
             }
         }
 
@@ -1324,14 +1325,14 @@
             clearMessage();
             displayMessage('Đang xóa video...', 'info');
             try {
-                await ensureAuthenticated();
+                await ensureAuthenticated(); // Gọi hàm này khi cần thiết
 
                 await deleteDoc(doc(db, `videos`, id));
                 showGlobalToast('Video đã được xóa thành công!', 'success');
                 showItemFeedback(id, 'Đã xóa!', 'success'); // Visual feedback
             } catch (error) {
                 console.error(`Lỗi khi xóa video ${id}:`, error);
-                showGlobalToast(`Lỗi khi xóa video: ${error.message}`, 'error');
+                showGlobalToast(`Lỗi khi xóa video: ${error.message}. Vui lòng kiểm tra quyền truy cập Firestore.`, 'error');
                 showItemFeedback(id, 'Lỗi xóa!', 'error'); // Visual feedback
             }
         }
@@ -1354,7 +1355,7 @@
                     throw new Error("Mã Video phải là một URL hợp lệ.");
                 }
 
-                await ensureAuthenticated();
+                await ensureAuthenticated(); // Gọi hàm này khi cần thiết
 
                 const videoDocRef = doc(db, `videos`, videoId);
                 await updateDoc(videoDocRef, {
@@ -1365,7 +1366,7 @@
                 showItemFeedback(videoId, 'Đã cập nhật!', 'success'); // Visual feedback
             } catch (error) {
                 console.error(`Lỗi khi cập nhật video ${videoId}:`, error);
-                showGlobalToast(`Lỗi khi cập nhật video: ${error.message}`, 'error');
+                showGlobalToast(`Lỗi khi cập nhật video: ${error.message}. Vui lòng kiểm tra quyền truy cập Firestore.`, 'error');
                 showItemFeedback(videoId, 'Lỗi cập nhật!', 'error'); // Visual feedback
             } finally {
                 showModalButtonLoading(saveEditBtn, saveEditBtnText, saveEditSpinner, false, 'Lưu');
@@ -1375,83 +1376,107 @@
         /**
          * Exports current Firestore video data to a CSV file.
          */
-        function exportToCsv() {
-            if (currentFirestoreVideos.length === 0) {
-                showGlobalToast('Không có dữ liệu để xuất CSV.', 'info');
-                return;
-            }
+        async function exportToCsv() {
+            displayMessage('Đang chuẩn bị dữ liệu để xuất CSV...', 'info');
+            try {
+                await ensureAuthenticated(); // Gọi hàm này khi cần thiết
 
-            // Define CSV headers
-            const headers = ["Tên Bài Hát", "Mã Video", "createdAt", "id"];
-            // Map video objects to CSV rows
-            const rows = currentFirestoreVideos.map(video => {
-                const createdAtDate = video.createdAt && typeof video.createdAt.seconds === 'number'
-                    ? new Date(video.createdAt.seconds * 1000).toISOString()
-                    : '';
-                return [
-                    `"${String(video['Tên Bài Hát'] || '').replace(/"/g, '""')}"`, // Escape double quotes
-                    `"${String(video['Mã Video'] || '').replace(/"/g, '""')}"`,
-                    createdAtDate,
-                    String(video.id || '')
-                ];
-            });
+                const videosCollectionRef = collection(db, `videos`);
+                const querySnapshot = await getDocs(query(videosCollectionRef)); // Fetch all documents for export
+                const allVideos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            // Combine headers and rows
-            const csvContent = [
-                headers.join(','),
-                ...rows.map(e => e.join(','))
-            ].join('\n');
+                if (allVideos.length === 0) {
+                    showGlobalToast('Không có dữ liệu để xuất CSV.', 'info');
+                    return;
+                }
 
-            // Create a Blob and download it
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            if (link.download !== undefined) { // Feature detection for download attribute
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'videos_firestore_export.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showGlobalToast('Dữ liệu đã được xuất ra file CSV.', 'success');
-            } else {
-                displayMessage('Trình duyệt của bạn không hỗ trợ tải xuống file trực tiếp.', 'error');
+                // Define CSV headers
+                const headers = ["Tên Bài Hát", "Mã Video", "createdAt", "id"];
+                // Map video objects to CSV rows
+                const rows = allVideos.map(video => {
+                    const createdAtDate = video.createdAt && typeof video.createdAt.seconds === 'number'
+                        ? new Date(video.createdAt.seconds * 1000).toISOString()
+                        : '';
+                    return [
+                        `"${String(video['Tên Bài Hát'] || '').replace(/"/g, '""')}"`, // Escape double quotes
+                        `"${String(video['Mã Video'] || '').replace(/"/g, '""')}"`,
+                        createdAtDate,
+                        String(video.id || '')
+                    ];
+                });
+
+                // Combine headers and rows
+                const csvContent = [
+                    headers.join(','),
+                    ...rows.map(e => e.join(','))
+                ].join('\n');
+
+                // Create a Blob and download it
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                if (link.download !== undefined) { // Feature detection for download attribute
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'videos_firestore_export.csv');
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showGlobalToast('Dữ liệu đã được xuất ra file CSV.', 'success');
+                } else {
+                    displayMessage('Trình duyệt của bạn không hỗ trợ tải xuống file trực tiếp.', 'error');
+                }
+            } catch (error) {
+                console.error("Lỗi khi xuất CSV:", error);
+                displayMessage(`Lỗi khi xuất CSV: ${error.message}. Vui lòng kiểm tra quyền truy cập Firestore.`, 'error');
             }
         }
 
         /**
          * Exports current Firestore video data to a JSON file.
          */
-        function exportToJson() {
-            if (currentFirestoreVideos.length === 0) {
-                displayMessage('Không có dữ liệu để xuất JSON.', 'info');
-                return;
-            }
+        async function exportToJson() {
+            displayMessage('Đang chuẩn bị dữ liệu để xuất JSON...', 'info');
+            try {
+                await ensureAuthenticated(); // Gọi hàm này khi cần thiết
 
-            // Prepare data for JSON export: convert Timestamps to ISO strings
-            const dataToExport = currentFirestoreVideos.map(video => {
-                const newVideo = { ...video };
-                if (newVideo.createdAt && typeof newVideo.createdAt.seconds === 'number') {
-                    newVideo.createdAt = new Date(newVideo.createdAt.seconds * 1000).toISOString();
+                const videosCollectionRef = collection(db, `videos`);
+                const querySnapshot = await getDocs(query(videosCollectionRef)); // Fetch all documents for export
+                const allVideos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                if (allVideos.length === 0) {
+                    displayMessage('Không có dữ liệu để xuất JSON.', 'info');
+                    return;
                 }
-                return newVideo;
-            });
 
-            const jsonContent = JSON.stringify(dataToExport, null, 2); // Pretty print JSON
+                // Prepare data for JSON export: convert Timestamps to ISO strings
+                const dataToExport = allVideos.map(video => {
+                    const newVideo = { ...video };
+                    if (newVideo.createdAt && typeof newVideo.createdAt.seconds === 'number') {
+                        newVideo.createdAt = new Date(newVideo.createdAt.seconds * 1000).toISOString();
+                    }
+                    return newVideo;
+                });
 
-            const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
-            const link = document.createElement('a');
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'videos_firestore_export.json');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showGlobalToast('Dữ liệu đã được xuất ra file JSON.', 'success');
-            } else {
-                displayMessage('Trình duyệt của bạn không hỗ trợ tải xuống file trực tiếp.', 'error');
+                const jsonContent = JSON.stringify(dataToExport, null, 2); // Pretty print JSON
+
+                const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+                const link = document.createElement('a');
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'videos_firestore_export.json');
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    showGlobalToast('Dữ liệu đã được xuất ra file JSON.', 'success');
+                } else {
+                    displayMessage('Trình duyệt của bạn không hỗ trợ tải xuống file trực tiếp.', 'error');
+                }
+            } catch (error) {
+                console.error("Lỗi khi xuất JSON:", error);
+                displayMessage(`Lỗi khi xuất JSON: ${error.message}. Vui lòng kiểm tra quyền truy cập Firestore.`, 'error');
             }
         }
 
@@ -1497,10 +1522,16 @@
                 try {
                     const csvText = e.target.result;
                     const parsedData = parseCsv(csvText);
+                    
+                    // Validate parsed data for expected columns
+                    if (parsedData.length > 0 && (!('title' in parsedData[0]) || !('url' in parsedData[0]))) {
+                        throw new Error("Tệp CSV thiếu các cột 'title' hoặc 'url' bắt buộc. Vui lòng kiểm tra định dạng.");
+                    }
+
                     if (parsedData.length > 0) {
                         dataToImportFromFile = parsedData;
                         importFileType = 'CSV';
-                        importFileName.textContent = file.name;
+                        importFileName.textContent = file.name; // Sửa lỗi: file.length không phải là tên file
                         videosToImportCount.textContent = parsedData.length;
                         importConfirmationModal.classList.remove('hidden'); // Show confirmation modal
                     } else {
@@ -1538,7 +1569,7 @@
                         videosToImportCount.textContent = parsedData.length;
                         importConfirmationModal.classList.remove('hidden'); // Show confirmation modal
                     } else {
-                        displayMessage('Tệp JSON không hợp lệ hoặc không chứa dữ liệu video đúng định dạng (mảng các đối tượng có "title" và "url").', 'error');
+                        throw new Error('Tệp JSON không hợp lệ hoặc không chứa dữ liệu video đúng định dạng (mảng các đối tượng có "title" và "url").');
                     }
                 } catch (error) {
                     console.error("Lỗi khi đọc hoặc phân tích tệp JSON:", error);
@@ -1562,48 +1593,74 @@
             viewRawDataModal.classList.remove('hidden');
         }
 
+        /**
+         * Ensures user is authenticated. Tries custom token, then anonymous.
+         * Updates authStatusMessage.
+         * @returns {Promise<void>}
+         */
+        async function ensureAuthenticated() {
+            if (auth.currentUser) {
+                // If already authenticated, update status message based on current user type
+                if (auth.currentUser.isAnonymous) {
+                    authStatusMessage.textContent = `Đã xác thực ẩn danh (ID: ${auth.currentUser.uid.substring(0, 8)}...).`;
+                } else {
+                    authStatusMessage.textContent = `Đã xác thực (ID: ${auth.currentUser.uid.substring(0, 8)}...).`;
+                }
+                return;
+            }
+
+            let authSuccess = false;
+            try {
+                if (initialAuthToken) {
+                    try {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("Đăng nhập Firebase bằng custom token thành công.");
+                        authStatusMessage.textContent = `Đã xác thực (ID: ${auth.currentUser.uid.substring(0, 8)}...).`;
+                        authSuccess = true;
+                    } catch (tokenError) {
+                        // Log custom token mismatch as a warning, then try anonymous
+                        if (tokenError.code === 'auth/custom-token-mismatch' || tokenError.code === 'auth/invalid-custom-token') {
+                            console.warn(`Token xác thực ban đầu không hợp lệ (${tokenError.code}). Đang thử đăng nhập ẩn danh...`);
+                            await signInAnonymously(auth); // Try anonymous sign-in
+                            console.log("Đăng nhập Firebase ẩn danh thành công sau khi token tùy chỉnh thất bại.");
+                            authStatusMessage.textContent = `Đã xác thực ẩn danh (ID: ${auth.currentUser.uid.substring(0, 8)}...).`;
+                            authSuccess = true;
+                        } else {
+                            // Re-throw other token errors to be caught by outer catch
+                            throw tokenError;
+                        }
+                    }
+                } else {
+                    await signInAnonymously(auth);
+                    console.log("Đăng nhập Firebase ẩn danh thành công.");
+                    authStatusMessage.textContent = `Đã xác thực ẩn danh (ID: ${auth.currentUser.uid.substring(0, 8)}...).`;
+                    authSuccess = true;
+                }
+            } catch (error) {
+                // Handle any other authentication errors that were not specifically caught
+                console.error("Lỗi xác thực Firebase nghiêm trọng:", error);
+                displayMessage(`Lỗi xác thực: ${error.message}. Vui lòng kiểm tra cấu hình Firebase hoặc kết nối mạng.`, 'error');
+                authStatusMessage.textContent = `Lỗi xác thực!`; // Short status
+                authSuccess = false;
+            }
+
+            // Enable/disable buttons based on final authentication status
+            uploadButton.disabled = !authSuccess;
+            addNewVideoButton.disabled = !authSuccess;
+            clearAllVideosButton.disabled = !authSuccess;
+            exportCsvButton.disabled = !authSuccess;
+            exportJsonButton.disabled = !authSuccess;
+            importCsvButton.disabled = !authSuccess;
+            importJsonButton.disabled = !authSuccess;
+            refreshListButton.disabled = !authSuccess;
+
+            if (!authSuccess) {
+                throw new Error("Xác thực Firebase thất bại hoàn toàn."); // Propagate error if truly unauthenticated
+            }
+        }
+
 
         // --- Event Listeners ---
-
-        // Firebase Auth State Change Listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                userStatusSpan.textContent = `Chào, ${user.displayName || user.email || 'Khách'}`;
-                signInButton.classList.add('hidden');
-                signOutButton.classList.remove('hidden');
-            } else {
-                userStatusSpan.textContent = 'Bạn chưa đăng nhập';
-                signInButton.classList.remove('hidden');
-                signOutButton.classList.add('hidden');
-            }
-        });
-
-        // Sign In/Out Buttons
-        signInButton.addEventListener('click', async () => {
-            try {
-                await signInWithPopup(auth, googleProvider);
-                showGlobalToast('Đăng nhập thành công!', 'success');
-            } catch (error) {
-                console.error("Lỗi đăng nhập Google:", error);
-                // Handle popup blocked error specifically
-                if (error.code === 'auth/popup-blocked') {
-                    showGlobalToast('Đăng nhập bị chặn: Vui lòng tắt trình chặn cửa sổ bật lên (pop-up blocker) của trình duyệt hoặc cho phép cửa sổ bật lên cho trang này, sau đó thử lại.', 'error');
-                } else {
-                    showGlobalToast(`Lỗi đăng nhập: ${error.message}`, 'error');
-                }
-            }
-        });
-
-        signOutButton.addEventListener('click', async () => {
-            try {
-                await signOut(auth);
-                showGlobalToast('Đăng xuất thành công!', 'info');
-            } catch (error) {
-                console.error("Lỗi đăng xuất:", error);
-                showGlobalToast(`Lỗi đăng xuất: ${error.message}`, 'error');
-            }
-        });
-
 
         // Event listener for upload button (Google Sheet)
         uploadButton.addEventListener('click', async () => {
@@ -1618,6 +1675,7 @@
                     displayMessage('Không tìm thấy dữ liệu nào trong Google Sheet để tải lên.', 'info');
                 }
             } catch (error) {
+                // Error already handled by fetchGoogleSheetData, just ensure loading is off
                 showUploadLoading(false);
             }
         });
@@ -1686,7 +1744,11 @@
 
         // Event listener for refresh list button
         refreshListButton.addEventListener('click', () => {
-            listenForVideos(); // Call listen function to refresh the list
+            currentPage = 1; // Reset to first page
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial'); // Call listen function to refresh the list
             displayMessage('Đang làm mới danh sách video...', 'info');
         });
 
@@ -1703,26 +1765,46 @@
         // Event listeners for sort buttons
         sortTitleAscBtn.addEventListener('click', () => {
             setActiveSortButton(sortTitleAscBtn);
+            currentSortField = 'Tên Bài Hát';
+            currentSortDirection = 'asc';
             currentPage = 1; // Reset to first page on sort
-            applyFiltersAndSortAndRenderPage();
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial');
         });
 
         sortTitleDescBtn.addEventListener('click', () => {
             setActiveSortButton(sortTitleDescBtn);
+            currentSortField = 'Tên Bài Hát';
+            currentSortDirection = 'desc';
             currentPage = 1; // Reset to first page on sort
-            applyFiltersAndSortAndRenderPage();
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial');
         });
 
         sortUrlAscBtn.addEventListener('click', () => {
             setActiveSortButton(sortUrlAscBtn);
+            currentSortField = 'Mã Video';
+            currentSortDirection = 'asc';
             currentPage = 1; // Reset to first page on sort
-            applyFiltersAndSortAndRenderPage();
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial');
         });
 
         sortUrlDescBtn.addEventListener('click', () => {
             setActiveSortButton(sortUrlDescBtn);
+            currentSortField = 'Mã Video';
+            currentSortDirection = 'desc';
             currentPage = 1; // Reset to first page on sort
-            applyFiltersAndSortAndRenderPage();
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial');
         });
 
         // Event listener for reset filters/sort button
@@ -1735,8 +1817,13 @@
             resetConfirmModal.classList.add('hidden'); // Hide modal
             searchInput.value = ''; // Clear search input
             setActiveSortButton(null); // Clear active sort button
+            currentSortField = 'Tên Bài Hát'; // Reset to default sort
+            currentSortDirection = 'asc';
             currentPage = 1; // Reset to first page
-            applyFiltersAndSortAndRenderPage(); // Re-render with no filters/sort
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial'); // Re-render with no filters/sort
             displayMessage('Đã đặt lại bộ lọc và sắp xếp.', 'info');
         });
 
@@ -1750,17 +1837,21 @@
         searchButton.addEventListener('click', () => {
             clearTimeout(searchDebounceTimeout); // Clear any pending debounce
             currentPage = 1; // Reset to first page on new search
-            applyFiltersAndSortAndRenderPage();
-            if (filteredAndSortedVideos.length === 0 && searchInput.value !== '') {
-                videoListDiv.innerHTML = '<p class="text-gray-500 text-center">Không tìm thấy video nào phù hợp.</p>';
-            }
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial');
+            // The message for "no matching videos" will now be handled by listenForVideos
         });
 
         clearSearchButton.addEventListener('click', () => {
             searchInput.value = ''; // Clear search input
             clearTimeout(searchDebounceTimeout); // Clear debounce
             currentPage = 1; // Reset to first page
-            applyFiltersAndSortAndRenderPage(); // Show entire list
+            firstVisibleDoc = null; // Clear pagination state
+            lastVisibleDoc = null;
+            querySnapshotCache = {}; // Clear cache
+            listenForVideos('initial'); // Show entire list
         });
         
         // Listen for Enter key in search input
@@ -1775,7 +1866,10 @@
             clearTimeout(searchDebounceTimeout);
             searchDebounceTimeout = setTimeout(() => {
                 currentPage = 1; // Reset to first page on new search
-                applyFiltersAndSortAndRenderPage();
+                firstVisibleDoc = null; // Clear pagination state
+                lastVisibleDoc = null;
+                querySnapshotCache = {}; // Clear cache
+                listenForVideos('initial');
             }, 300); // 300ms debounce time
         });
 
@@ -1914,15 +2008,15 @@
         prevPageBtn.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
-                renderCurrentPage();
+                listenForVideos('prev');
             }
         });
 
         nextPageBtn.addEventListener('click', () => {
-            const totalPages = Math.ceil(filteredAndSortedVideos.length / PAGE_SIZE);
+            const totalPages = Math.ceil(totalVideoCount / PAGE_SIZE);
             if (currentPage < totalPages) {
                 currentPage++;
-                renderCurrentPage();
+                listenForVideos('next');
             }
         });
 
@@ -1955,12 +2049,20 @@
 
 
         // Auto-run when page loads
-        window.onload = () => {
+        document.addEventListener('DOMContentLoaded', async () => { // Changed to DOMContentLoaded
             showUploadLoading(false);
-            listenForVideos();
+            // Đảm bảo xác thực ẩn danh được thực hiện ngay khi tải trang
+            try {
+                await ensureAuthenticated(); // Gọi hàm này khi khởi tạo
+            } catch (authError) {
+                // Lỗi đã được xử lý bên trong ensureAuthenticated, chỉ cần ghi nhận
+                console.error("Xác thực ban đầu thất bại, các chức năng tương tác có thể bị vô hiệu hóa.");
+            }
+
+            listenForVideos('initial'); // Initial load of videos
             setActiveSortButton(null); // Clear initial active sort button state
             clearMessage(); // Clear any initial message
-        };
+        });
     </script>
 </body>
 </html>
