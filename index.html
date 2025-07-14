@@ -597,6 +597,23 @@
       .dropdown .dropdown-content { right: auto; left: 50%; transform: translateX(-50%) translateY(-10px); }
       .dropdown.show .dropdown-content { transform: translateX(-50%) translateY(0); }
     }
+
+    @media (max-width: 600px) {
+      body { padding: 10px; } /* Slightly less padding on very small screens */
+      #main-container { padding: 15px; } /* Adjust main container padding */
+      h1 { font-size: 1.8em; } /* Smaller heading for tiny screens */
+      .app-logo { width: 50px; height: 50px; } /* Smaller logo */
+      .header-nav-bar { justify-content: center; } /* Center nav buttons on small screens */
+      .nav-button-base { height: 40px; padding: 0 15px; font-size: 10px; } /* Smaller nav buttons */
+      .dropdown-content { width: 160px; } /* Smaller dropdowns */
+      #search-input { padding: 10px 35px; font-size: 13px; } /* Smaller search input */
+      .video-title { font-size: 12px; } /* Smaller video titles in list */
+      #player-controls { gap: 10px; padding: 8px; } /* Tighter controls */
+      .control-btn { width: 35px; height: 35px; } /* Smaller control buttons */
+      #volume-slider { width: 80px; } /* Adjust volume slider width */
+      .info-message { font-size: 0.95em; padding: 10px 15px; } /* Smaller info messages */
+      #search-loading-spinner { right: 30px; } /* Adjust position for smaller screens */
+    }
   </style>
 </head>
 <body data-theme="light">
@@ -692,6 +709,7 @@
         </div>
       </div>
       <div id="now-playing-display" class="now-playing-display-style">
+        <span id="now-playing-icon" style="margin-right: 8px;"><i data-lucide="play"></i></span>
         <span id="now-playing-text">Chưa có video nào đang phát.</span>
       </div>
       <div id="player-controls">
@@ -808,6 +826,7 @@
   let videoLoadingSpinner; 
   let nowPlayingDisplay; 
   let nowPlayingText; 
+  let nowPlayingIcon; // New element reference
 
   // --- Hàm chính ---
   window.addEventListener('DOMContentLoaded', function() { init(); });
@@ -836,10 +855,18 @@
     videoLoadingSpinner = document.getElementById('video-loading-spinner'); 
     nowPlayingDisplay = document.getElementById('now-playing-display'); 
     nowPlayingText = document.getElementById('now-playing-text'); 
+    nowPlayingIcon = document.getElementById('now-playing-icon'); // Get the new icon element
 
     setupEventListeners();
     loadTheme();
     backgroundAudioEl.src = silentAudio;
+    backgroundAudioEl.volume = 0; // Ensure silent audio is always silent
+
+    // Attempt to play silent audio early. This might fail due to autoplay policies,
+    // but a subsequent user interaction (like playing a video) will re-attempt it.
+    backgroundAudioEl.play().catch(e => {
+        console.warn("Initial silent audio play failed (likely autoplay policy):", e);
+    });
 
     // Load saved shuffle and repeat states
     isShuffle = localStorage.getItem('isShuffle') === 'true';
@@ -1011,7 +1038,7 @@
 
     } catch (error) {
       console.error("Error fetching more documents:", error);
-      handleFetchError(`Lỗi khi tải thêm video từ Firestore: ${error.message}`);
+      handleFetchError(`Lỗi khi tải thêm video từ Firestore: ${e.message}`);
     } finally {
       loadMoreLoading.style.display = 'none';
     }
@@ -1203,24 +1230,39 @@
     if (playerState === YT.PlayerState.PLAYING) {
         updateInfoMessages('videoLoading', false); 
         updateInfoMessages('videoError', false); 
+        if (nowPlayingIcon) nowPlayingIcon.innerHTML = `<i data-lucide="play"></i>`; // Show play icon
     } else if (playerState === YT.PlayerState.BUFFERING) {
         updateInfoMessages('videoLoading', true); 
         updateInfoMessages('videoError', false); 
+        if (nowPlayingIcon) nowPlayingIcon.innerHTML = `<i data-lucide="loader-2"></i>`; // Show loader icon
     } else {
         updateInfoMessages('videoLoading', false); 
+        if (nowPlayingIcon) nowPlayingIcon.innerHTML = `<i data-lucide="pause"></i>`; // Show pause icon for other states
     }
+    lucide.createIcons(); // Re-render Lucide icons after changing innerHTML
 
     if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = (playerState === YT.PlayerState.PLAYING) ? 'playing' : 'paused';
     }
     if (playerState === YT.PlayerState.PLAYING) {
       manageWakeLock(true);
-      backgroundAudioEl.play().catch(e => {});
+      // Ensure background audio plays when YouTube video is playing
+      if (backgroundAudioEl.paused) { 
+          backgroundAudioEl.volume = 0; // Ensure it's silent
+          backgroundAudioEl.play().catch(e => {
+              console.warn("Failed to play silent background audio:", e);
+              // Optionally, inform user if background playback might be limited
+              // updateInfoMessages('info', true, 'Phát nhạc nền có thể bị giới hạn bởi trình duyệt của bạn.');
+          });
+      }
       clearInterval(saveStateInterval);
       saveStateInterval = setInterval(savePlayerState, 3000);
     } else {
       manageWakeLock(false);
-      backgroundAudioEl.pause();
+      // Pause background audio when YouTube video is not playing
+      if (!backgroundAudioEl.paused) {
+          backgroundAudioEl.pause();
+      }
       clearInterval(saveStateInterval);
     }
     if (playerState === YT.PlayerState.ENDED) { handleVideoEnd(); }
